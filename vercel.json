@@ -3,13 +3,7 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/nextjs"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/app/$1"
+      "use": "@vercel/next"  // Thay đổi từ @vercel/nextjs -> @vercel/next
     }
   ]
 }
