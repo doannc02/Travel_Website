@@ -1,75 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma';
+// File: app/api/admin/user/[id]/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/app/lib/prisma'
 
-// GET - Lấy thông tin user theo ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const id = params.id;
-    
-    const user = await prisma.user.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            hotelBookings: true,
-            flightBookings: true,
-            packageBookings: true
-          }
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
+
+// Helper find user
+async function findUser(id: string) {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: {
+      _count: {
+        select: {
+          hotelBookings: true,
+          flightBookings: true,
+          packageBookings: true
         }
       }
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
     }
+  })
+  if (!user) throw new Error('User not found')
+  return user
+}
 
-    return NextResponse.json(user);
-  } catch (error) {
-    console.error('Get user error:', error);
+// GET
+export async function GET(_req: NextRequest, context: RouteContext) {
+  try {
+    const { id } = await context.params
+    const user = await findUser(id)
+    return NextResponse.json(user)
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('User not found') ? 404 : 400 }
+    )
   }
 }
 
-// PUT - Cập nhật user
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// PUT
+export async function PUT(req: NextRequest, context: RouteContext) {
   try {
-    const id = params.id;
-    const body = await request.json();
-    
-    // Kiểm tra user tồn tại
-    const existingUser = await prisma.user.findUnique({
-      where: { id }
-    });
+    const { id } = await context.params
+    await findUser(id)
 
-    if (!existingUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
+    const body = await req.json()
 
-    // Cập nhật user
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
         name: body.name,
         email: body.email,
         phone: body.phone,
-        avatar: body.avatar,
-        role: body.role,
-        status: body.status
+        avatar: body.avatar
+        // Nếu muốn update role/status, uncomment khi bảng có field tương ứng
+        // role: body.role,
+        // status: body.status
       },
       include: {
         _count: {
@@ -80,74 +66,40 @@ export async function PUT(
           }
         }
       }
-    });
+    })
 
-    return NextResponse.json(updatedUser);
-  } catch (error) {
-    console.error('Update user error:', error);
+    return NextResponse.json(updatedUser)
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('User not found') ? 404 : 400 }
+    )
   }
 }
 
-// DELETE - Xóa user
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// DELETE
+export async function DELETE(_req: NextRequest, context: RouteContext) {
   try {
-    const id = params.id;
-    
-    // Kiểm tra user tồn tại
-    const existingUser = await prisma.user.findUnique({
-      where: { id }
-    });
+    const { id } = await context.params
+    const user = await findUser(id)
 
-    if (!existingUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Kiểm tra xem có ràng buộc nào không
-    const relatedData = await prisma.user.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            hotelBookings: true,
-            flightBookings: true,
-            packageBookings: true
-          }
-        }
-      }
-    });
-
-    if (relatedData && (
-      relatedData._count.hotelBookings > 0 ||
-      relatedData._count.flightBookings > 0 ||
-      relatedData._count.packageBookings > 0
-    )) {
+    if (
+      user._count.hotelBookings > 0 ||
+      user._count.flightBookings > 0 ||
+      user._count.packageBookings > 0
+    ) {
       return NextResponse.json(
         { error: 'Cannot delete user with related bookings. Please remove related bookings first.' },
         { status: 400 }
-      );
+      )
     }
 
-    // Xóa user
-    await prisma.user.delete({
-      where: { id }
-    });
-
-    return NextResponse.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('Delete user error:', error);
+    await prisma.user.delete({ where: { id } })
+    return NextResponse.json({ message: 'User deleted successfully' })
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('User not found') ? 404 : 400 }
+    )
   }
-} 
+}

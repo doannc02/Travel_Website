@@ -1,161 +1,88 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma';
+// File: app/api/admin/flight/[id]/route.ts
+import { prisma } from '@/app/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
 
-// GET - Lấy thông tin flight theo ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
+
+// Helper: parse ID hoặc throw lỗi
+async function getId(params: Promise<{ id: string }>) {
+  const realParams = await params
+  const id = parseInt(realParams.id)
+  if (isNaN(id)) throw new Error('Invalid ID')
+  return id
+}
+
+// Helper: kiểm tra tồn tại flight
+async function findFlight(id: number) {
+  const flight = await prisma.flight.findUnique({
+    where: { id },
+    include: {
+      _count: {
+        select: { bookings: true }
+      }
+    }
+  })
+  if (!flight) throw new Error('Flight not found')
+  return flight
+}
+
+// GET - Lấy flight theo ID
+export async function GET(_req: NextRequest, context: RouteContext) {
   try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid ID' },
-        { status: 400 }
-      );
-    }
-
-    const flight = await prisma.flight.findUnique({
-      where: { id }
-    });
-
-    if (!flight) {
-      return NextResponse.json(
-        { error: 'Flight not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(flight);
-  } catch (error) {
-    console.error('Get flight error:', error);
+    const id = await getId(context.params)
+    const flight = await findFlight(id)
+    return NextResponse.json(flight)
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('Invalid') ? 400 : 404 }
+    )
   }
 }
 
 // PUT - Cập nhật flight
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, context: RouteContext) {
   try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid ID' },
-        { status: 400 }
-      );
-    }
+    const id = await getId(context.params)
+    await findFlight(id) // đảm bảo tồn tại
 
-    const body = await request.json();
-    
-    // Kiểm tra flight tồn tại
-    const existingFlight = await prisma.flight.findUnique({
-      where: { id }
-    });
+    const body = await req.json()
 
-    if (!existingFlight) {
-      return NextResponse.json(
-        { error: 'Flight not found' },
-        { status: 404 }
-      );
-    }
-
-    // Cập nhật flight
     const updatedFlight = await prisma.flight.update({
       where: { id },
-      data: {
-        airline: body.airline,
-        flightNumber: body.flightNumber,
-        departure: body.departure,
-        arrival: body.arrival,
-        departureTime: body.departureTime,
-        arrivalTime: body.arrivalTime,
-        duration: body.duration,
-        price: body.price,
-        originalPrice: body.originalPrice,
-        discount: body.discount,
-        stops: body.stops,
-        aircraft: body.aircraft,
-        class: body.class,
-        availableSeats: body.availableSeats,
-        departureDate: body.departureDate,
-        returnDate: body.returnDate
-      }
-    });
+      data: body // giả sử frontend gửi đúng fields
+    })
 
-    return NextResponse.json(updatedFlight);
-  } catch (error) {
-    console.error('Update flight error:', error);
+    return NextResponse.json(updatedFlight)
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('Invalid') ? 400 : 404 }
+    )
   }
 }
 
 // DELETE - Xóa flight
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_req: NextRequest, context: RouteContext) {
   try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
+    const id = await getId(context.params)
+    const flight = await findFlight(id)
+
+    if (flight._count.bookings > 0) {
       return NextResponse.json(
-        { error: 'Invalid ID' },
+        { error: 'Cannot delete flight with related bookings.' },
         { status: 400 }
-      );
+      )
     }
 
-    // Kiểm tra flight tồn tại
-    const existingFlight = await prisma.flight.findUnique({
-      where: { id }
-    });
-
-    if (!existingFlight) {
-      return NextResponse.json(
-        { error: 'Flight not found' },
-        { status: 404 }
-      );
-    }
-
-    // Kiểm tra xem có ràng buộc nào không
-    const relatedData = await prisma.flight.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            bookings: true
-          }
-        }
-      }
-    });
-
-    if (relatedData && relatedData._count.bookings > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete flight with related bookings. Please remove related bookings first.' },
-        { status: 400 }
-      );
-    }
-
-    // Xóa flight
-    await prisma.flight.delete({
-      where: { id }
-    });
-
-    return NextResponse.json({ message: 'Flight deleted successfully' });
-  } catch (error) {
-    console.error('Delete flight error:', error);
+    await prisma.flight.delete({ where: { id } })
+    return NextResponse.json({ message: 'Flight deleted successfully' })
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('Invalid') ? 400 : 404 }
+    )
   }
-} 
+}

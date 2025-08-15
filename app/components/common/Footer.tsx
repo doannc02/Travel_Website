@@ -1,96 +1,98 @@
-
 "use client"
 import { MotionDiv, MotionA } from './MotionWrapper';
 import Link from 'next/link';
+import Image from 'next/image';
+
 export const footerData = {
-    company: {
-      name: "Công ty TNHH Traveloka Vietnam",
-      address: "Tầng 18, Tòa nhà Capital Place, 29 Liễu Giai, Ba Đình, Hà Nội",
-      taxCode: "Mã số doanh nghiệp: 0109080056",
-      license: "Giấy phép kinh doanh số 0109080056 do Sở Kế hoạch và Đầu tư Hà Nội cấp ngày 28/12/2018"
+  company: {
+    name: "Công ty TNHH Traveloka Vietnam",
+    address: "Tầng 18, Tòa nhà Capital Place, 29 Liễu Giai, Ba Đình, Hà Nội",
+    taxCode: "Mã số doanh nghiệp: 0109080056",
+    license: "Giấy phép kinh doanh số 0109080056 do Sở Kế hoạch và Đầu tư Hà Nội cấp ngày 28/12/2018"
+  },
+  links: [
+    {
+      title: "Về Traveloka",
+      items: [
+        { text: "Về chúng tôi", url: "/about" },
+        { text: "Trung tâm trợ giúp", url: "/help" },
+        { text: "Điều khoản sử dụng", url: "/terms" },
+        { text: "Chính sách bảo mật", url: "/privacy" },
+        { text: "Tuyển dụng", url: "/careers" }
+      ]
     },
-    links: [
-      {
-        title: "Về Traveloka",
-        items: [
-          { text: "Về chúng tôi", url: "/about" },
-          { text: "Trung tâm trợ giúp", url: "/help" },
-          { text: "Điều khoản sử dụng", url: "/terms" },
-          { text: "Chính sách bảo mật", url: "/privacy" },
-          { text: "Tuyển dụng", url: "/careers" }
-        ]
-      },
-      {
-        title: "Sản phẩm",
-        items: [
-          { text: "Khách sạn", url: "/hotels" },
-          { text: "Vé máy bay", url: "/flights" },
-          { text: "Combo tiết kiệm", url: "/packages" },
-          { text: "Hoạt động & Vui chơi", url: "/activities" },
-          { text: "Bảo hiểm du lịch", url: "/insurance" }
-        ]
-      },
-      {
-        title: "Đối tác",
-        items: [
-          { text: "Đăng ký trở thành đối tác", url: "/partners" },
-          { text: "Chương trình liên kết", url: "/affiliate" },
-          { text: "Traveloka Ads", url: "/ads" },
-          { text: "Traveloka Connect", url: "/connect" }
-        ]
-      },
-      {
-        title: "Tải ứng dụng",
-        items: [
-          { 
-            text: "App Store", 
-            url: "#",
-            icon: "/icons/app-store.svg" 
-          },
-          { 
-            text: "Google Play", 
-            url: "#",
-            icon: "/icons/google-play.svg" 
-          },
-          { 
-            text: "AppGallery", 
-            url: "#",
-            icon: "/icons/app-gallery.svg" 
-          }
-        ]
-      }
-    ],
-    socialMedia: [
-      { name: "Facebook", icon: "/icons/facebook.svg", url: "#" },
-      { name: "Instagram", icon: "/icons/instagram.svg", url: "#" },
-      { name: "Twitter", icon: "/icons/twitter.svg", url: "#" },
-      { name: "Youtube", icon: "/icons/youtube.svg", url: "#" },
-      { name: "LinkedIn", icon: "/icons/linkedin.svg", url: "#" }
-    ],
-    paymentMethods: [
-      "/icons/visa.svg",
-      "/icons/mastercard.svg",
-      "/icons/jcb.svg",
-      "/icons/amex.svg",
-      "/icons/paypal.svg",
-      "/icons/momo.svg",
-      "/icons/zalopay.svg"
-    ],
-    awards: [
-      { 
-        name: "Best Travel App 2023", 
-        icon: "/icons/award1.svg" 
-      },
-      { 
-        name: "Top Brand 2022", 
-        icon: "/icons/award2.svg" 
-      },
-      { 
-        name: "Customer Choice", 
-        icon: "/icons/award3.svg" 
-      }
-    ]
-  };
+    {
+      title: "Sản phẩm",
+      items: [
+        { text: "Khách sạn", url: "/hotels" },
+        { text: "Vé máy bay", url: "/flights" },
+        { text: "Combo tiết kiệm", url: "/packages" },
+        { text: "Hoạt động & Vui chơi", url: "/activities" },
+        { text: "Bảo hiểm du lịch", url: "/insurance" }
+      ]
+    },
+    {
+      title: "Đối tác",
+      items: [
+        { text: "Đăng ký trở thành đối tác", url: "/partners" },
+        { text: "Chương trình liên kết", url: "/affiliate" },
+        { text: "Traveloka Ads", url: "/ads" },
+        { text: "Traveloka Connect", url: "/connect" }
+      ]
+    },
+    {
+      title: "Tải ứng dụng",
+      items: [
+        { 
+          text: "App Store", 
+          url: "#",
+          icon: "/icons/app-store.svg" 
+        },
+        { 
+          text: "Google Play", 
+          url: "#",
+          icon: "/icons/google-play.svg" 
+        },
+        { 
+          text: "AppGallery", 
+          url: "#",
+          icon: "/icons/app-gallery.svg" 
+        }
+      ]
+    }
+  ],
+  socialMedia: [
+    { name: "Facebook", icon: "/icons/facebook.svg", url: "#" },
+    { name: "Instagram", icon: "/icons/instagram.svg", url: "#" },
+    { name: "Twitter", icon: "/icons/twitter.svg", url: "#" },
+    { name: "Youtube", icon: "/icons/youtube.svg", url: "#" },
+    { name: "LinkedIn", icon: "/icons/linkedin.svg", url: "#" }
+  ],
+  paymentMethods: [
+    "/icons/visa.svg",
+    "/icons/mastercard.svg",
+    "/icons/jcb.svg",
+    "/icons/amex.svg",
+    "/icons/paypal.svg",
+    "/icons/momo.svg",
+    "/icons/zalopay.svg"
+  ],
+  awards: [
+    { 
+      name: "Best Travel App 2023", 
+      icon: "/icons/award1.svg" 
+    },
+    { 
+      name: "Top Brand 2022", 
+      icon: "/icons/award2.svg" 
+    },
+    { 
+      name: "Customer Choice", 
+      icon: "/icons/award3.svg" 
+    }
+  ]
+};
+
 export default function Footer() {
   return (
     <footer className="bg-gray-100 text-gray-700 border-t border-gray-200">
@@ -125,22 +127,25 @@ export default function Footer() {
                 {section.title}
               </h4>
               <ul className="space-y-3">
-                {section.items.map((item, itemIndex) => (
+                {section.items.map((item : any, itemIndex) => (
                   <li key={itemIndex}>
-                    <MotionA
-                      href={item.url}
-                      whileHover={{ y: -3 }}
-                      className="hover:text-red-600 transition-colors flex items-center"
-                    >
-                      {item.icon && (
-                        <img 
-                          src={item.icon} 
-                          alt={item.text} 
-                          className="w-5 h-5 mr-2" 
-                        />
-                      )}
-                      {item.text}
-                    </MotionA>
+                    <Link href={item.url} passHref legacyBehavior>
+                      <MotionA
+                        whileHover={{ y: -3 }}
+                        className="hover:text-red-600 transition-colors flex items-center"
+                      >
+                        {item?.icon && (
+                          <Image 
+                            src={item?.icon as any} 
+                            alt={item.text} 
+                            width={20}
+                            height={20}
+                            className="w-5 h-5 mr-2" 
+                          />
+                        )}
+                        {item.text}
+                      </MotionA>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -159,20 +164,22 @@ export default function Footer() {
           <h4 className="text-lg font-semibold text-gray-900 mb-4">
             Kết nối với chúng tôi
           </h4>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-4">
             {footerData.socialMedia.map((social, index) => (
-              <MotionA
-                key={index}
-                href={social.url}
-                whileHover={{ y: -3 }}
-                className="bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-all"
-              >
-                <img 
-                  src={social.icon} 
-                  alt={social.name} 
-                  className="w-6 h-6" 
-                />
-              </MotionA>
+              <Link href={social.url} key={index} passHref legacyBehavior>
+                <MotionA
+                  whileHover={{ y: -3 }}
+                  className="bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-all"
+                >
+                  <Image 
+                    src={social.icon} 
+                    alt={social.name} 
+                    width={24}
+                    height={24}
+                    className="w-6 h-6" 
+                  />
+                </MotionA>
+              </Link>
             ))}
           </div>
         </MotionDiv>
@@ -195,10 +202,12 @@ export default function Footer() {
                 whileHover={{ scale: 1.05 }}
                 className="bg-white p-2 rounded shadow-sm"
               >
-                <img 
+                <Image 
                   src={method} 
                   alt={`Payment method ${index}`} 
-                  className="h-8" 
+                  width={40}
+                  height={24}
+                  className="h-6 w-auto" 
                 />
               </MotionDiv>
             ))}
@@ -222,10 +231,12 @@ export default function Footer() {
                 whileHover={{ scale: 1.05 }}
                 className="flex items-center bg-white p-3 rounded-lg shadow-sm"
               >
-                <img 
+                <Image 
                   src={award.icon} 
                   alt={award.name} 
-                  className="h-10 mr-3" 
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 mr-3" 
                 />
                 <span className="text-sm font-medium">{award.name}</span>
               </MotionDiv>

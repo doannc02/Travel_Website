@@ -1,10 +1,36 @@
-"use client"
+"use client";
 import { useState } from 'react';
 import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../../components/common/MotionWrapper';
 import Link from 'next/link';
 
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  dateOfBirth: string;
+  gender: string;
+  agreeToTerms: boolean;
+  receiveNewsletter: boolean;
+}
+
+interface Errors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  agreeToTerms?: string;
+  [key: string]: string | undefined;
+}
+
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -18,7 +44,7 @@ export default function RegisterPage() {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Errors>({});
 
   const steps = [
     { id: 1, title: 'Thông tin cá nhân', icon: '👤' },
@@ -26,7 +52,7 @@ export default function RegisterPage() {
     { id: 3, title: 'Xác nhận', icon: '✅' }
   ];
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -34,8 +60,8 @@ export default function RegisterPage() {
     }
   };
 
-  const validateStep = (step) => {
-    const newErrors = {};
+  const validateStep = (step: number) => {
+    const newErrors: Errors = {};
 
     if (step === 1) {
       if (!formData.firstName.trim()) newErrors.firstName = 'Vui lòng nhập họ';
@@ -76,7 +102,7 @@ export default function RegisterPage() {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep(currentStep)) {
       // Handle form submission
@@ -507,4 +533,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,11 +1,42 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../components/common/MotionWrapper';
+import { useApi } from '../hooks/useApi';
+
+interface TourPackage {
+  id: number;
+  title: string;
+  subtitle: string;
+  image: string;
+  price: number;
+  discount: string;
+  duration: string;
+  destination: {
+    city: string;
+    country: string;
+  };
+}
+
+interface BookingData {
+  departureDate: string;
+  returnDate: string;
+  adults: number;
+  children: number;
+  infants: number;
+  roomType: string;
+  specialRequests: string;
+  contactInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+}
 
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedTour, setSelectedTour] = useState(travelData.promotions[0]);
-  const [bookingData, setBookingData] = useState({
+  const [selectedTour, setSelectedTour] = useState<TourPackage | null>(null);
+  const [bookingData, setBookingData] = useState<BookingData>({
     departureDate: '',
     returnDate: '',
     adults: 2,
@@ -21,12 +52,25 @@ export default function BookingPage() {
     }
   });
 
+  // Fetch tour packages from API
+  const { data: toursData, loading: toursLoading, error: toursError } = useApi<{
+    success: boolean;
+    data: TourPackage[];
+  }>('/api/tour-packages', { immediate: true });
+
   const steps = [
     { id: 1, title: 'Chọn tour', icon: '🎯' },
     { id: 2, title: 'Thông tin đặt', icon: '📝' },
     { id: 3, title: 'Thanh toán', icon: '💳' },
     { id: 4, title: 'Xác nhận', icon: '✅' }
   ];
+
+  // Set first tour as default when data loads
+  useEffect(() => {
+    if (toursData?.success && toursData.data.length > 0 && !selectedTour) {
+      setSelectedTour(toursData.data[0]);
+    }
+  }, [toursData, selectedTour]);
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -41,10 +85,72 @@ export default function BookingPage() {
   };
 
   const calculateTotal = () => {
-    const basePrice = selectedTour.price || 2990000;
+    if (!selectedTour) return 0;
+    const basePrice = selectedTour.price || 0;
     const totalPeople = bookingData.adults + bookingData.children;
     return basePrice * totalPeople;
   };
+
+  const handleSubmitBooking = async () => {
+    if (!selectedTour) return;
+    
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tourId: selectedTour.id,
+          ...bookingData,
+          totalPrice: calculateTotal(),
+          status: 'pending'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        handleNext(); // Move to confirmation step
+      } else {
+        console.error('Booking failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+    }
+  };
+
+  if (toursLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
+
+  if (toursError || !toursData?.success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500">Đã xảy ra lỗi khi tải dữ liệu tour</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedTour) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Không có tour nào khả dụng</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -117,7 +223,7 @@ export default function BookingPage() {
                 </MotionH3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {travelData.promotions.map((tour, index) => (
+                  {toursData.data.map((tour, index) => (
                     <MotionDiv
                       key={tour.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -144,7 +250,10 @@ export default function BookingPage() {
                         </MotionP>
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-bold text-red-600">
-                            {tour.discount}
+                            {new Intl.NumberFormat('vi-VN', { 
+                              style: 'currency', 
+                              currency: 'VND' 
+                            }).format(tour.price)}
                           </span>
                           <span className="text-sm text-gray-500">
                             {tour.duration}
@@ -424,14 +533,34 @@ export default function BookingPage() {
                 Quay lại
               </MotionButton>
 
-              <MotionButton
-                onClick={handleNext}
-                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {currentStep === steps.length ? 'Hoàn tất' : 'Tiếp tục'}
-              </MotionButton>
+              {currentStep < steps.length - 1 ? (
+                <MotionButton
+                  onClick={handleNext}
+                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Tiếp tục
+                </MotionButton>
+              ) : currentStep === steps.length - 1 ? (
+                <MotionButton
+                  onClick={handleSubmitBooking}
+                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Xác nhận đặt tour
+                </MotionButton>
+              ) : (
+                <MotionButton
+                  onClick={() => window.location.href = '/my-bookings'}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Xem đơn đặt tour
+                </MotionButton>
+              )}
             </div>
           </div>
 
@@ -462,7 +591,10 @@ export default function BookingPage() {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-red-600">
-                    {selectedTour.discount}
+                    {new Intl.NumberFormat('vi-VN', { 
+                      style: 'currency', 
+                      currency: 'VND' 
+                    }).format(selectedTour.price)}
                   </span>
                   <span className="text-sm text-gray-500">
                     {selectedTour.duration}
@@ -502,15 +634,30 @@ export default function BookingPage() {
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between text-sm mb-2">
                   <span>Giá tour:</span>
-                  <span>{selectedTour.price?.toLocaleString()}đ</span>
+                  <span>
+                    {new Intl.NumberFormat('vi-VN', { 
+                      style: 'currency', 
+                      currency: 'VND' 
+                    }).format(selectedTour.price)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm mb-2">
                   <span>Phí dịch vụ:</span>
-                  <span>150.000đ</span>
+                  <span>
+                    {new Intl.NumberFormat('vi-VN', { 
+                      style: 'currency', 
+                      currency: 'VND' 
+                    }).format(150000)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-red-600">
                   <span>Tổng cộng:</span>
-                  <span>{calculateTotal().toLocaleString()}đ</span>
+                  <span>
+                    {new Intl.NumberFormat('vi-VN', { 
+                      style: 'currency', 
+                      currency: 'VND' 
+                    }).format(calculateTotal())}
+                  </span>
                 </div>
               </div>
 
@@ -532,4 +679,4 @@ export default function BookingPage() {
       </div>
     </div>
   );
-} 
+}

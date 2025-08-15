@@ -105,8 +105,8 @@ export async function POST(request: NextRequest) {
         name: body.name,
         phone: body.phone,
         avatar: body.avatar,
-        role: body.role || 'user',
-        status: body.status || 'active'
+        //role: body.role || 'user',
+        //status: body.status || 'active'
       },
       include: {
         _count: {

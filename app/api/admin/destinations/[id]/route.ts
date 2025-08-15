@@ -1,220 +1,96 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma';
+// File: app/api/admin/destinations/[id]/route.ts
+import { prisma } from '@/app/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
 
-// GET - Lấy thông tin destination theo ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid ID' },
-        { status: 400 }
-      );
-    }
+interface RouteContext {
+  params: Promise<{ id: string }> // App Router expect params as Promise
+}
 
-    const destination = await prisma.destination.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            hotels_relation: true,
-            activities_relation: true,
-            packages_relation: true,
-            reviews: true,
-            highlights: true,
-            activities_list: true
-          }
+// Helper: parse ID hoặc throw lỗi
+async function getId(params: Promise<{ id: string }>) {
+  const realParams = await params
+  const id = parseInt(realParams.id)
+  if (isNaN(id)) throw new Error('Invalid ID')
+  return id
+}
+
+// Helper: kiểm tra tồn tại destination
+async function findDestination(id: number) {
+  const dest = await prisma.destination.findUnique({
+    where: { id },
+    include: {
+      _count: {
+        select: {
+          hotels_relation: true,
+          activities_relation: true,
+          packages_relation: true,
+          reviews: true,
+          highlights: true,
+          activities_list: true
         }
       }
-    });
-
-    if (!destination) {
-      return NextResponse.json(
-        { error: 'Destination not found' },
-        { status: 404 }
-      );
     }
+  })
+  if (!dest) throw new Error('Destination not found')
+  return dest
+}
 
-    // Format data
-    const formattedDestination = {
-      id: destination.id,
-      city: destination.city,
-      country: destination.country,
-      province: destination.province,
-      description: destination.description,
-      image: destination.image,
-      heroImage: destination.heroImage,
-      rating: destination.rating,
-      reviewCount: destination.reviewCount,
-      hotels: destination._count.hotels_relation,
-      fromPrice: destination.fromPrice,
-      toPrice: destination.toPrice,
-      bestTime: destination.bestTime,
-      category: destination.category,
-      popularity: destination.popularity,
-      slug: destination.slug,
-      temperature: destination.temperature,
-      condition: destination.condition,
-      humidity: destination.humidity,
-      rainfall: destination.rainfall,
-      flightTime: destination.flightTime,
-      ferryTime: destination.ferryTime,
-      carTime: destination.carTime,
-      createdAt: destination.createdAt,
-      updatedAt: destination.updatedAt,
-      _count: destination._count
-    };
-
-    return NextResponse.json(formattedDestination);
-  } catch (error) {
-    console.error('Get destination error:', error);
+// GET - Lấy destination theo ID
+export async function GET(_req: NextRequest, context: RouteContext) {
+  try {
+    const id = await getId(context.params)
+    const destination = await findDestination(id)
+    return NextResponse.json(destination)
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('Invalid') ? 400 : 404 }
+    )
   }
 }
 
 // PUT - Cập nhật destination
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, context: RouteContext) {
   try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid ID' },
-        { status: 400 }
-      );
-    }
+    const id = await getId(context.params)
+    await findDestination(id) // đảm bảo tồn tại
 
-    const body = await request.json();
-    
-    // Kiểm tra destination tồn tại
-    const existingDestination = await prisma.destination.findUnique({
-      where: { id }
-    });
+    const body = await req.json()
 
-    if (!existingDestination) {
-      return NextResponse.json(
-        { error: 'Destination not found' },
-        { status: 404 }
-      );
-    }
-
-    // Cập nhật destination
-    const updatedDestination = await prisma.destination.update({
+    const updated = await prisma.destination.update({
       where: { id },
-      data: {
-        city: body.city,
-        country: body.country,
-        province: body.province,
-        description: body.description,
-        image: body.image,
-        heroImage: body.heroImage,
-        rating: body.rating,
-        reviewCount: body.reviewCount,
-        hotels: body.hotels,
-        fromPrice: body.fromPrice,
-        toPrice: body.toPrice,
-        bestTime: body.bestTime,
-        category: body.category,
-        popularity: body.popularity,
-        temperature: body.temperature,
-        condition: body.condition,
-        humidity: body.humidity,
-        rainfall: body.rainfall,
-        flightTime: body.flightTime,
-        ferryTime: body.ferryTime,
-        carTime: body.carTime
-      }
-    });
+      data: body // giả sử frontend gửi đúng fields
+    })
 
-    return NextResponse.json(updatedDestination);
-  } catch (error) {
-    console.error('Update destination error:', error);
+    return NextResponse.json(updated)
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('Invalid') ? 400 : 404 }
+    )
   }
 }
 
 // DELETE - Xóa destination
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_req: NextRequest, context: RouteContext) {
   try {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
+    const id = await getId(context.params)
+    const destination = await findDestination(id)
+
+    // Kiểm tra ràng buộc liên quan trước khi xóa
+    if (Object.values(destination._count).some(count => count > 0)) {
       return NextResponse.json(
-        { error: 'Invalid ID' },
+        { error: 'Cannot delete destination with related data.' },
         { status: 400 }
-      );
+      )
     }
 
-    // Kiểm tra destination tồn tại
-    const existingDestination = await prisma.destination.findUnique({
-      where: { id }
-    });
-
-    if (!existingDestination) {
-      return NextResponse.json(
-        { error: 'Destination not found' },
-        { status: 404 }
-      );
-    }
-
-    // Kiểm tra xem có ràng buộc nào không
-    const relatedData = await prisma.destination.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            hotels_relation: true,
-            activities_relation: true,
-            packages_relation: true,
-            reviews: true,
-            highlights: true,
-            activities_list: true
-          }
-        }
-      }
-    });
-
-    if (relatedData && (
-      relatedData._count.hotels_relation > 0 ||
-      relatedData._count.activities_relation > 0 ||
-      relatedData._count.packages_relation > 0 ||
-      relatedData._count.reviews > 0 ||
-      relatedData._count.highlights > 0 ||
-      relatedData._count.activities_list > 0
-    )) {
-      return NextResponse.json(
-        { error: 'Cannot delete destination with related data. Please remove related items first.' },
-        { status: 400 }
-      );
-    }
-
-    // Xóa destination
-    await prisma.destination.delete({
-      where: { id }
-    });
-
-    return NextResponse.json({ message: 'Destination deleted successfully' });
-  } catch (error) {
-    console.error('Delete destination error:', error);
+    await prisma.destination.delete({ where: { id } })
+    return NextResponse.json({ message: 'Destination deleted successfully' })
+  } catch (err: any) {
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+      { error: err.message },
+      { status: err.message.includes('Invalid') ? 400 : 404 }
+    )
   }
-} 
+}

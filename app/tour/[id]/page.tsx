@@ -1,7 +1,6 @@
 "use client"
 import { useState } from 'react';
 import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../../components/common/MotionWrapper';
-import { travelData } from '../../data/travelData';
 import { useParams } from 'next/navigation';
 
 export default function TourDetailPage() {

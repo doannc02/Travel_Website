@@ -17,9 +17,12 @@ export async function GET(request: NextRequest) {
     
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { destination: { contains: search, mode: 'insensitive' } }
+        { title: { contains: search, mode: 'insensitive' } }, // Đổi từ name thành title
+        { subtitle: { contains: search, mode: 'insensitive' } }, // Thêm subtitle
+        { destination: { 
+            city: { contains: search, mode: 'insensitive' } 
+          }
+        } // Sửa cách search destination
       ];
     }
 
@@ -69,8 +72,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Validation
-    const requiredFields = ['name', 'description', 'destination', 'duration', 'price'];
+    // Validation - sử dụng field names từ schema
+    const requiredFields = ['title', 'subtitle', 'duration', 'price'];
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -83,19 +86,21 @@ export async function POST(request: NextRequest) {
     // Tạo package mới trong database
     const tourPackage = await prisma.tourPackage.create({
       data: {
-        name: body.name,
-        description: body.description,
-        destination: body.destination,
-        duration: body.duration,
-        price: body.price,
-        originalPrice: body.originalPrice || body.price,
+        title: body.title, // Đổi từ name thành title
+        subtitle: body.subtitle, // Thêm subtitle
+        image: body.image || 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
+        badge: body.badge || null,
         discount: body.discount || '0%',
+        originalPrice: body.originalPrice || body.price,
+        price: body.price,
+        duration: body.duration,
+        groupSize: body.groupSize || '1-20 người', // Đổi từ maxGroupSize thành groupSize
+        departure: body.departure || 'Hà Nội',
+        destinationId: body.destinationId || null, // Sử dụng destinationId thay vì destination string
         rating: body.rating || 0,
         reviewCount: body.reviewCount || 0,
-        maxGroupSize: body.maxGroupSize || 20,
-        difficulty: body.difficulty || 'Dễ',
-        category: body.category || 'General',
-        image: body.image || 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop'
+        validUntil: body.validUntil || '2024-12-31',
+        category: body.category || 'General'
       },
       include: {
         destination: {
@@ -115,4 +120,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
