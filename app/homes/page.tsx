@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import HeroSection from '../components/home/HeroSection';
+import Banner from '../components/home/Banner';
 import ServicesGrid from '../components/home/ServicesGrid';
 import Promotions from '../components/home/Promotion';
 import Destinations from '../components/home/DestinationSection';
@@ -13,7 +13,8 @@ export default function Home() {
       </Head>
       
       <main className="flex-grow">
-        <HeroSection />
+        <Banner />
+        {/* <HeroSection /> */} {/* Xóa dòng này nếu muốn thay thế hoàn toàn */}
         <ServicesGrid />
         <Promotions />
         <Destinations />
