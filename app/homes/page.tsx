@@ -9,7 +9,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Head>
         <title>
-          Traveloka Clone - Đặt phòng khách sạn, vé máy bay trực tuyến
+          Travel Thanh Hóa - Đặt phòng khách sạn, vé máy bay trực tuyến
         </title>
         <meta
           name="description"
@@ -18,8 +18,7 @@ export default function Home() {
       </Head>
 
       <main className="flex-grow">
-        <Banner />
-        {/* <HeroSection /> */} {/* Xóa dòng này nếu muốn thay thế hoàn toàn */}
+        <HeroSection />
         <ServicesGrid />
         <Promotions />
         <Destinations />
