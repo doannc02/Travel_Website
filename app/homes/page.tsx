@@ -18,7 +18,8 @@ export default function Home() {
       </Head>
 
       <main className="flex-grow">
-        <HeroSection />
+        <Banner />
+        {/* <HeroSection /> */} {/* Xóa dòng này nếu muốn thay thế hoàn toàn */}
         <ServicesGrid />
         <Promotions />
         <Destinations />
