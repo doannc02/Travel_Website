@@ -41,12 +41,27 @@ export async function GET(request: NextRequest) {
         skip: (page - 1) * limit,
         take: limit,
         where,
-        include: {
+        select: {
+          id: true,
+          title: true,
+          subtitle: true,
+          image: true,
+          badge: true,
+          discount: true,
+          originalPrice: true,
+          price: true,
+          duration: true,
+          groupSize: true,
+          departure: true,
+          rating: true,
+          reviewCount: true,
+          validUntil: true,
+          category: true,
           destination: { select: { city: true, country: true, image: true } },
           highlights: { select: { description: true } },
           itinerary: { select: { day: true, content: true } },
           included: { select: { item: true } },
-          notIncluded: { select: { item: true } }
+          notIncluded: { select: { item: true } },
         },
         orderBy: { createdAt: 'desc' }
       }),
@@ -54,7 +69,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Format dữ liệu trả về
-    const data = tourPackages.map(pkg => ({
+    const data = tourPackages.map((pkg: any) => ({
       id: pkg.id,
       title: pkg.title,
       subtitle: pkg.subtitle,
@@ -71,10 +86,10 @@ export async function GET(request: NextRequest) {
       reviewCount: pkg.reviewCount,
       validUntil: pkg.validUntil,
       category: pkg.category,
-      highlights: pkg.highlights.map(h => h.description),
+      highlights: pkg.highlights.map((h: any) => h.description),
       itinerary: pkg.itinerary,
-      included: pkg.included.map(i => i.item),
-      notIncluded: pkg.notIncluded.map(ni => ni.item),
+      included: pkg.included.map((i: any) => i.item),
+      notIncluded: pkg.notIncluded.map((ni: any) => ni.item),
       features: []
     }));
 

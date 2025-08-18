@@ -338,6 +338,25 @@ async function main() {
     ]
   })
 
+  // Tour package images
+  // @ts-ignore - table exists after prisma generate
+  await prisma.tourPackageImage.createMany({
+    data: [
+      { packageId: package1.id, url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=800&fit=crop', position: 1 },
+      { packageId: package1.id, url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&h=800&fit=crop', position: 2 },
+      { packageId: package1.id, url: 'https://images.unsplash.com/photo-1501117716987-c8e86b5356df?w=1200&h=800&fit=crop', position: 3 }
+    ]
+  })
+
+  // Tour package reviews
+  // @ts-ignore - table exists after prisma generate
+  await prisma.tourPackageReview.createMany({
+    data: [
+      { packageId: package1.id, name: 'Trần Minh', rating: 5, comment: 'Tour rất đáng tiền, dịch vụ tốt!', photos: [] },
+      { packageId: package1.id, name: 'Lê Thu', rating: 4.5, comment: 'Lịch trình hợp lý, hướng dẫn viên thân thiện.', photos: [] }
+    ]
+  })
+
   // Create activities
   const activity1 = await prisma.activity.create({
     data: {

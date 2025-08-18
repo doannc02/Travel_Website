@@ -3,17 +3,19 @@ import HeroSection from '../components/home/HeroSection';
 import ServicesGrid from '../components/home/ServicesGrid';
 import Promotions from '../components/home/Promotion';
 import Destinations from '../components/home/DestinationSection';
+import FeaturedTours from '../components/home/FeaturedTours';
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
-        <title>Traveloka Clone - Đặt phòng khách sạn, vé máy bay trực tuyến</title>
-        <meta name="description" content="Đặt phòng khách sạn, vé máy bay, combo du lịch và hoạt động giải trí với giá tốt nhất" />
+        <title>Traveloka Clone - Đặt tour, khách sạn, vé máy bay</title>
+        <meta name="description" content="Đặt tour du lịch, khách sạn, vé máy bay, combo du lịch và hoạt động với giá tốt" />
       </Head>
       
       <main className="flex-grow">
         <HeroSection />
+        <FeaturedTours />
         <ServicesGrid />
         <Promotions />
         <Destinations />

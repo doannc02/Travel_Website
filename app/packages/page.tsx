@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { MotionDiv, MotionH2, MotionP, MotionButton } from '../components/common/MotionWrapper';
+import Link from 'next/link';
 
 interface Package {
   id: number;
@@ -253,20 +254,24 @@ export default function PackagesPage() {
 
                   {/* CTA Buttons */}
                   <div className="flex space-x-3">
-                    <MotionButton
-                      className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300"
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Đặt ngay
-                    </MotionButton>
-                    <MotionButton
-                      className="px-6 py-3 border-2 border-green-600 text-green-600 rounded-xl font-semibold hover:bg-green-600 hover:text-white transition-all duration-300"
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Chi tiết
-                    </MotionButton>
+                    <Link className="flex-1" href={`/tour/${pkg.id}`}>
+                      <MotionButton
+                        className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300"
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Đặt ngay
+                      </MotionButton>
+                    </Link>
+                    <Link href={`/tour/${pkg.id}`}>
+                      <MotionButton
+                        className="px-6 py-3 border-2 border-green-600 text-green-600 rounded-xl font-semibold hover:bg-green-600 hover:text-white transition-all duration-300"
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        Chi tiết
+                      </MotionButton>
+                    </Link>
                   </div>
                 </div>
               </MotionDiv>

@@ -27,6 +27,7 @@ model User {
   activityBookings ActivityBooking[]
   insurancePolicies InsurancePolicy[]
   destinationReviews DestinationReview[]
+  tourPackageReviews TourPackageReview[]
 
   @@map("users")
 }
@@ -202,6 +203,7 @@ model TourPackage {
   id             Int      @id @default(autoincrement())
   title          String
   subtitle       String
+  description    String?
   image          String
   badge          String?
   discount       String
@@ -225,6 +227,8 @@ model TourPackage {
   included      PackageIncluded[]
   notIncluded   PackageNotIncluded[]
   bookings      PackageBooking[]
+  images        TourPackageImage[]
+  reviews       TourPackageReview[]
 
   @@map("tour_packages")
 }
@@ -523,4 +527,36 @@ model DestinationReview {
   user        User       @relation(fields: [userId], references: [id])
 
   @@map("destination_reviews")
+}
+
+model TourPackageImage {
+  id         Int    @id @default(autoincrement())
+  packageId  Int
+  url        String
+  caption    String?
+  position   Int    @default(0)
+
+  // Relations
+  package    TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("tour_package_images")
+}
+
+model TourPackageReview {
+  id         Int      @id @default(autoincrement())
+  packageId  Int
+  userId     String?
+  name       String
+  rating     Float
+  comment    String
+  photos     String[]
+  status     String   @default("published")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  package    TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("tour_package_reviews")
 }
