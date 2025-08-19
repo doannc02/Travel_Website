@@ -29,8 +29,9 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         validUntil: true,
         category: true,
         destination: { select: { city: true, country: true } },
+        description: true,
         highlights: { select: { description: true } },
-        itinerary: { select: { day: true, content: true } },
+        itinerary: { select: { day: true, content: true, startTime: true, transport: true, meals: true } },
         included: { select: { item: true } },
         notIncluded: { select: { item: true } },
         ...(rich ? {
@@ -48,6 +49,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       id: pkg.id,
       title: pkg.title,
       subtitle: pkg.subtitle,
+      description: pkg.description,
       image: pkg.image,
       badge: pkg.badge,
       discount: pkg.discount,

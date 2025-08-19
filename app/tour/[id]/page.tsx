@@ -217,42 +217,84 @@ export default function TourDetailPage() {
 
               {activeTab === "overview" && (
                 <div className="space-y-8">
-                  {/* Intro */}
-                  <div>
-                    <MotionH3 className="text-xl font-semibold mb-3">Giới thiệu</MotionH3>
-                    <MotionP className="text-gray-700 whitespace-pre-line">
-                      {tourData.description || 'Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực.'}
-                    </MotionP>
-                  </div>
+                  {Array.isArray(tourData.sections) && tourData.sections.length > 0 ? (
+                    <>
+                      {/* Intro */}
+                      <div>
+                        <MotionH3 className="text-xl font-semibold mb-3">Giới thiệu</MotionH3>
+                        <MotionP className="text-gray-700 whitespace-pre-line">
+                          {tourData.description || 'Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực.'}
+                        </MotionP>
+                      </div>
 
-                  {/* Highlights */}
-                  <div>
-                    <MotionH3 className="text-xl font-semibold mb-3">Điểm nổi bật</MotionH3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {tourData.highlights.map((h: string, idx: number) => (
-                        <div key={idx} className="flex items-center space-x-2 text-gray-700">
-                          <span className="text-green-600">✓</span>
-                          <span>{h}</span>
+                      {/* Highlights */}
+                      <div>
+                        <MotionH3 className="text-xl font-semibold mb-3">Điểm nổi bật</MotionH3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {tourData.highlights.map((h: string, idx: number) => (
+                            <div key={idx} className="flex items-center space-x-2 text-gray-700">
+                              <span className="text-green-600">✓</span>
+                              <span>{h}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Rich sections */}
+                      {tourData.sections.map((s: any, idx: number) => (
+                        <div key={idx}>
+                          <MotionH3 className="text-xl font-semibold mb-3">{s.title}</MotionH3>
+                          <MotionP className="text-gray-700 whitespace-pre-line">{s.content}</MotionP>
+                          {s.photos?.length > 0 && (
+                            <div className="mt-3 grid grid-cols-2 gap-3">
+                              {s.photos.map((p: string, i: number) => (
+                                <img key={i} src={p} alt="section" className="rounded-xl object-cover w-full h-40" />
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
-                    </div>
-                  </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Intro */}
+                      <div>
+                        <MotionH3 className="text-xl font-semibold mb-3">Giới thiệu</MotionH3>
+                        <MotionP className="text-gray-700 whitespace-pre-line">
+                          {tourData.description || 'Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực.'}
+                        </MotionP>
+                      </div>
 
-                  {/* Culture & Food */}
-                  <div>
-                    <MotionH3 className="text-xl font-semibold mb-3">Văn hóa & Ẩm thực</MotionH3>
-                    <MotionP className="text-gray-700 whitespace-pre-line">
-                      {tourData.cultureAndFood || 'Khám phá văn hóa địa phương và thưởng thức ẩm thực đặc trưng vùng miền.'}
-                    </MotionP>
-                  </div>
+                      {/* Highlights */}
+                      <div>
+                        <MotionH3 className="text-xl font-semibold mb-3">Điểm nổi bật</MotionH3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {tourData.highlights.map((h: string, idx: number) => (
+                            <div key={idx} className="flex items-center space-x-2 text-gray-700">
+                              <span className="text-green-600">✓</span>
+                              <span>{h}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
 
-                  {/* Featured Experiences */}
-                  <div>
-                    <MotionH3 className="text-xl font-semibold mb-3">Trải nghiệm nổi bật</MotionH3>
-                    <MotionP className="text-gray-700 whitespace-pre-line">
-                      {tourData.featuredExperiences || 'Tắm biển, chèo kayak, ngắm hoàng hôn, khám phá chợ đêm và nhiều hơn nữa.'}
-                    </MotionP>
-                  </div>
+                      {/* Culture & Food */}
+                      <div>
+                        <MotionH3 className="text-xl font-semibold mb-3">Văn hóa & Ẩm thực</MotionH3>
+                        <MotionP className="text-gray-700 whitespace-pre-line">
+                          Khám phá văn hóa địa phương và thưởng thức ẩm thực đặc trưng vùng miền.
+                        </MotionP>
+                      </div>
+
+                      {/* Featured Experiences */}
+                      <div>
+                        <MotionH3 className="text-xl font-semibold mb-3">Trải nghiệm nổi bật</MotionH3>
+                        <MotionP className="text-gray-700 whitespace-pre-line">
+                          Tắm biển, chèo kayak, ngắm hoàng hôn, khám phá chợ đêm và nhiều hơn nữa.
+                        </MotionP>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 

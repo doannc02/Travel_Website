@@ -337,10 +337,11 @@ async function main() {
 
   // ================== TOUR PACKAGES ==================
   for (const dest of allDestinations.slice(0, 10)) {
-    await prisma.tourPackage.create({
+    const package1 = await prisma.tourPackage.create({
       data: {
         title: `Combo ${dest.city} 3N2Đ`,
         subtitle: `Khám phá ${dest.city} với khách sạn + vé máy bay + tour`,
+        description: `Hành trình khám phá ${dest.city} đầy thú vị với những trải nghiệm độc đáo. Từ cảnh sắc thiên nhiên hùng vĩ đến văn hóa bản địa đặc sắc, tour này sẽ mang đến cho bạn những kỷ niệm khó quên.`,
         image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?w=1200&h=800&fit=crop',
         badge: 'HOT',
         discount: 'Giảm 30%',
@@ -355,6 +356,122 @@ async function main() {
         validUntil: '2025-12-31',
         category: 'Combo'
       }
+    })
+
+    // Create highlights
+    await prisma.packageHighlight.createMany({
+      data: [
+        { packageId: package1.id, description: 'Khám phá những điểm đến nổi tiếng nhất' },
+        { packageId: package1.id, description: 'Thưởng thức ẩm thực địa phương đặc sắc' },
+        { packageId: package1.id, description: 'Trải nghiệm văn hóa bản địa chân thực' },
+        { packageId: package1.id, description: 'Nghỉ ngơi tại khách sạn chất lượng cao' },
+        { packageId: package1.id, description: 'Hướng dẫn viên chuyên nghiệp, nhiệt tình' }
+      ]
+    })
+
+    // Create itinerary
+    await prisma.packageItinerary.createMany({
+      data: [
+        { 
+          packageId: package1.id, 
+          day: '1', 
+          content: 'Khởi hành từ Hà Nội → Đến điểm đến → Check-in khách sạn → Ăn tối → Nghỉ đêm',
+          startTime: '07:00',
+          transport: 'Xe ô tô',
+          meals: 'Ăn tối'
+        },
+        { 
+          packageId: package1.id, 
+          day: '2', 
+          content: 'Ăn sáng → Tham quan các điểm du lịch chính → Ăn trưa → Tiếp tục khám phá → Ăn tối',
+          startTime: '08:00',
+          transport: 'Xe ô tô + Đi bộ',
+          meals: 'Ăn sáng, trưa, tối'
+        },
+        { 
+          packageId: package1.id, 
+          day: '3', 
+          content: 'Ăn sáng → Mua sắm → Ăn trưa → Khởi hành về Hà Nội',
+          startTime: '07:30',
+          transport: 'Xe ô tô',
+          meals: 'Ăn sáng, trưa'
+        }
+      ]
+    })
+
+    // Create included/not included
+    await prisma.packageIncluded.createMany({
+      data: [
+        { packageId: package1.id, item: 'Vé máy bay khứ hồi' },
+        { packageId: package1.id, item: 'Khách sạn 3-4 sao' },
+        { packageId: package1.id, item: 'Ăn uống theo chương trình' },
+        { packageId: package1.id, item: 'Xe đưa đón' },
+        { packageId: package1.id, item: 'Hướng dẫn viên' },
+        { packageId: package1.id, item: 'Bảo hiểm du lịch' }
+      ]
+    })
+
+    await prisma.packageNotIncluded.createMany({
+      data: [
+        { packageId: package1.id, item: 'Chi phí cá nhân' },
+        { packageId: package1.id, item: 'Đồ uống' },
+        { packageId: package1.id, item: 'Tiền tip' },
+        { packageId: package1.id, item: 'Vé tham quan ngoài chương trình' }
+      ]
+    })
+
+    // Create sections for rich content
+    await prisma.tourPackageSection.createMany({
+      data: [
+        {
+          packageId: package1.id,
+          title: 'Văn hóa & Ẩm thực',
+          content: `Khám phá văn hóa độc đáo của ${dest.city} với những phong tục tập quán truyền thống. Thưởng thức các món ăn đặc sản địa phương được chế biến từ những nguyên liệu tươi ngon nhất.`,
+          photos: ['https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800&h=600&fit=crop'],
+          position: 1
+        },
+        {
+          packageId: package1.id,
+          title: 'Trải nghiệm nổi bật',
+          content: `Tắm biển tại những bãi biển đẹp nhất, chèo kayak khám phá vịnh, ngắm hoàng hôn lãng mạn, khám phá chợ đêm sôi động và nhiều hoạt động thú vị khác.`,
+          photos: ['https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop'],
+          position: 2
+        }
+      ]
+    })
+
+    // Create stops with rich content
+    await prisma.tourPackageStop.createMany({
+      data: [
+        {
+          packageId: package1.id,
+          title: 'Bãi biển chính',
+          description: 'Bãi biển đẹp với cát trắng mịn, nước biển trong xanh, lý tưởng cho việc tắm biển và thư giãn.',
+          guide: 'Nên tắm biển vào sáng sớm hoặc chiều muộn để tránh nắng gắt',
+          address: 'Bãi biển chính, ' + dest.city,
+          latitude: 21.0285,
+          longitude: 105.8542,
+          photos: ['https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop'],
+          tips: ['Mang theo kem chống nắng', 'Chuẩn bị đồ tắm', 'Không bơi quá xa bờ'],
+          bestTime: 'Sáng sớm hoặc chiều muộn',
+          mapThumb: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=200&h=200&fit=crop',
+          position: 1
+        },
+        {
+          packageId: package1.id,
+          title: 'Chợ đêm',
+          description: 'Chợ đêm sôi động với nhiều món ăn đường phố, đồ lưu niệm và không khí vui nhộn.',
+          guide: 'Nên đi vào buổi tối từ 18:00-22:00 để có trải nghiệm tốt nhất',
+          address: 'Chợ đêm, ' + dest.city,
+          latitude: 21.0285,
+          longitude: 105.8542,
+          photos: ['https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&h=600&fit=crop'],
+          tips: ['Mặc cả khi mua đồ', 'Thử các món ăn địa phương', 'Mang tiền mặt'],
+          bestTime: 'Buổi tối 18:00-22:00',
+          mapThumb: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=200&h=200&fit=crop',
+          position: 2
+        }
+      ]
     })
   }
 
