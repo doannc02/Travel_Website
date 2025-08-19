@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
+import bcrypt from "bcryptjs";
+
 
 // GET - Lấy danh sách users
 export async function GET(request: NextRequest) {
@@ -71,12 +73,13 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Tạo user mới
+// POST - Tạo user mới
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
     // Validation
-    const requiredFields = ['email', 'name'];
+    const requiredFields = ['email', 'name', 'password'];
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -98,6 +101,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+
     // Tạo user mới
     const user = await prisma.user.create({
       data: {
@@ -105,6 +111,7 @@ export async function POST(request: NextRequest) {
         name: body.name,
         phone: body.phone,
         avatar: body.avatar,
+        password: hashedPassword,
         //role: body.role || 'user',
         //status: body.status || 'active'
       },
@@ -127,4 +134,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

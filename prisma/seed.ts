@@ -5,461 +5,461 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting database seeding...')
 
-  // Create destinations
-  const phuQuoc = await prisma.destination.create({
-    data: {
-      city: 'Phú Quốc',
-      country: 'Việt Nam',
-      province: 'Kiên Giang',
-      description: 'Đảo ngọc Phú Quốc - thiên đường du lịch với những bãi biển đẹp nhất Việt Nam, ẩm thực hải sản tươi ngon và văn hóa địa phương độc đáo.',
-      image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-      heroImage: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&h=600&fit=crop',
-      rating: 4.8,
-      reviewCount: 15420,
-      hotels: 156,
-      fromPrice: 1200000,
-      toPrice: 8000000,
-      bestTime: 'Tháng 11 - Tháng 4',
-      category: 'Biển đảo',
-      popularity: 'Rất cao',
-      slug: 'phu-quoc',
-      temperature: '25-32°C',
-      condition: 'Nắng đẹp, ít mưa',
-      humidity: '70-85%',
-      rainfall: 'Thấp',
-      flightTime: '45 phút từ TP.HCM',
-      ferryTime: '2.5 giờ từ Rạch Giá',
-      carTime: 'Không thể đi xe'
-    }
-  })
-
-  const daNang = await prisma.destination.create({
-    data: {
-      city: 'Đà Nẵng',
-      country: 'Việt Nam',
-      province: 'Đà Nẵng',
-      description: 'Thành phố đáng sống nhất Việt Nam với bãi biển Mỹ Khê đẹp nhất thế giới, văn hóa lịch sử phong phú và ẩm thực đặc sản đa dạng.',
-      image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&h=600&fit=crop',
-      heroImage: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=600&fit=crop',
-      rating: 4.7,
-      reviewCount: 12890,
-      hotels: 234,
-      fromPrice: 800000,
-      toPrice: 6000000,
-      bestTime: 'Tháng 2 - Tháng 8',
-      category: 'Biển',
-      popularity: 'Cao',
-      slug: 'da-nang',
-      temperature: '22-35°C',
-      condition: 'Nắng đẹp, mưa vừa',
-      humidity: '65-80%',
-      rainfall: 'Trung bình',
-      flightTime: '1 giờ từ Hà Nội',
-      ferryTime: '2.5 giờ từ Huế',
-      carTime: '3 giờ từ Huế'
-    }
-  })
-
-  const nhaTrang = await prisma.destination.create({
-    data: {
-      city: 'Nha Trang',
-      country: 'Việt Nam',
-      province: 'Khánh Hòa',
-      description: 'Thành phố biển xinh đẹp với khí hậu ôn hòa quanh năm, những hòn đảo hoang sơ và ẩm thực hải sản tươi ngon đặc trưng miền Trung.',
-      image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-      heroImage: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&h=600&fit=crop',
-      rating: 4.6,
-      reviewCount: 9876,
-      hotels: 189,
-      fromPrice: 600000,
-      toPrice: 4500000,
-      bestTime: 'Tháng 1 - Tháng 8',
-      category: 'Biển',
-      popularity: 'Cao',
-      slug: 'nha-trang',
-      temperature: '24-33°C',
-      condition: 'Nắng đẹp, mưa ít',
-      humidity: '70-85%',
-      rainfall: 'Thấp',
-      flightTime: '45 phút từ TP.HCM',
-      ferryTime: '1 giờ từ Nha Trang',
-      carTime: '6 giờ từ TP.HCM'
-    }
-  })
-
-  const sapa = await prisma.destination.create({
-    data: {
-      city: 'Sapa',
-      country: 'Việt Nam',
-      province: 'Lào Cai',
-      description: 'Thị trấn miền núi cao với khí hậu mát mẻ quanh năm, ruộng bậc thang tuyệt đẹp và văn hóa dân tộc thiểu số độc đáo.',
-      image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-      heroImage: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&h=600&fit=crop',
-      rating: 4.9,
-      reviewCount: 11234,
-      hotels: 145,
-      fromPrice: 500000,
-      toPrice: 3500000,
-      bestTime: 'Tháng 9 - Tháng 11',
-      category: 'Núi',
-      popularity: 'Rất cao',
-      slug: 'sapa',
-      temperature: '15-25°C',
-      condition: 'Mát mẻ, sương mù',
-      humidity: '80-90%',
-      rainfall: 'Trung bình',
-      flightTime: 'Không có sân bay',
-      ferryTime: 'Không có phà',
-      carTime: '6 giờ từ Hà Nội'
-    }
-  })
-
-  // Create destination highlights for Phu Quoc
-  await prisma.destinationHighlight.createMany({
+  // ================== DESTINATIONS ==================
+  const destinations = await prisma.destination.createMany({
     data: [
       {
-        destinationId: phuQuoc.id,
-        name: 'Bãi Khem',
-        description: 'Bãi biển đẹp nhất Phú Quốc với cát trắng mịn và nước biển trong xanh',
+        city: 'Phú Quốc',
+        country: 'Việt Nam',
+        province: 'Kiên Giang',
+        description: 'Đảo ngọc Phú Quốc - thiên đường du lịch với những bãi biển đẹp, hải sản tươi ngon.',
         image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-        rating: 4.9
+        heroImage: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=1200&h=600&fit=crop',
+        rating: 4.8,
+        reviewCount: 15420,
+        hotels: 156,
+        fromPrice: 1200000,
+        toPrice: 8000000,
+        bestTime: 'Tháng 11 - Tháng 4',
+        category: 'Biển đảo',
+        popularity: 'Rất cao',
+        slug: 'phu-quoc',
+        temperature: '25-32°C',
+        condition: 'Nắng đẹp, ít mưa',
+        humidity: '70-85%',
+        rainfall: 'Thấp',
+        flightTime: '45 phút từ TP.HCM',
+        ferryTime: '2.5 giờ từ Rạch Giá',
+        carTime: 'Không thể đi xe'
       },
       {
-        destinationId: phuQuoc.id,
-        name: 'Vịnh Đá Vàng',
-        description: 'Vịnh biển hoang sơ với những tảng đá granit đen độc đáo',
+        city: 'Đà Nẵng',
+        country: 'Việt Nam',
+        province: 'Đà Nẵng',
+        description: 'Thành phố đáng sống nhất Việt Nam với bãi biển Mỹ Khê tuyệt đẹp.',
         image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&h=600&fit=crop',
-        rating: 4.7
+        heroImage: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=600&fit=crop',
+        rating: 4.7,
+        reviewCount: 12890,
+        hotels: 234,
+        fromPrice: 800000,
+        toPrice: 6000000,
+        bestTime: 'Tháng 2 - Tháng 8',
+        category: 'Biển',
+        popularity: 'Cao',
+        slug: 'da-nang',
+        temperature: '22-35°C',
+        condition: 'Nắng đẹp, mưa vừa',
+        humidity: '65-80%',
+        rainfall: 'Trung bình',
+        flightTime: '1 giờ từ Hà Nội',
+        ferryTime: '2.5 giờ từ Huế',
+        carTime: '3 giờ từ Huế'
       },
       {
-        destinationId: phuQuoc.id,
-        name: 'Chợ đêm Dinh Cậu',
-        description: 'Chợ đêm sôi động với ẩm thực địa phương và mua sắm',
-        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
-        rating: 4.6
+        city: 'Nha Trang',
+        country: 'Việt Nam',
+        province: 'Khánh Hòa',
+        description: 'Thành phố biển xinh đẹp với nhiều hòn đảo hoang sơ.',
+        image: 'https://images.unsplash.com/photo-1526481280691-19585f32e7f7?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1526481280691-19585f32e7f7?w=1200&h=600&fit=crop',
+        rating: 4.6,
+        reviewCount: 9876,
+        hotels: 189,
+        fromPrice: 600000,
+        toPrice: 4500000,
+        bestTime: 'Tháng 1 - Tháng 8',
+        category: 'Biển',
+        popularity: 'Cao',
+        slug: 'nha-trang',
+        temperature: '24-33°C',
+        condition: 'Nắng đẹp, mưa ít',
+        humidity: '70-85%',
+        rainfall: 'Thấp',
+        flightTime: '45 phút từ TP.HCM',
+        ferryTime: '1 giờ từ Nha Trang',
+        carTime: '6 giờ từ TP.HCM'
       },
       {
-        destinationId: phuQuoc.id,
-        name: 'VinWonders Phú Quốc',
-        description: 'Công viên giải trí hiện đại với nhiều trò chơi hấp dẫn',
-        image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-        rating: 4.8
+        city: 'Sapa',
+        country: 'Việt Nam',
+        province: 'Lào Cai',
+        description: 'Thị trấn miền núi cao với ruộng bậc thang tuyệt đẹp.',
+        image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=600&fit=crop',
+        rating: 4.9,
+        reviewCount: 11234,
+        hotels: 145,
+        fromPrice: 500000,
+        toPrice: 3500000,
+        bestTime: 'Tháng 9 - Tháng 11',
+        category: 'Núi',
+        popularity: 'Rất cao',
+        slug: 'sapa',
+        temperature: '15-25°C',
+        condition: 'Mát mẻ, sương mù',
+        humidity: '80-90%',
+        rainfall: 'Trung bình',
+        flightTime: 'Không có sân bay',
+        ferryTime: 'Không có phà',
+        carTime: '6 giờ từ Hà Nội'
+      },
+      {
+        city: 'Hà Nội',
+        country: 'Việt Nam',
+        province: 'Hà Nội',
+        description: 'Thủ đô nghìn năm văn hiến với Hồ Gươm, phố cổ, ẩm thực đặc sắc.',
+        image: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1200&h=600&fit=crop',
+        rating: 4.7,
+        reviewCount: 20000,
+        hotels: 350,
+        fromPrice: 700000,
+        toPrice: 7000000,
+        bestTime: 'Tháng 9 - Tháng 4',
+        category: 'Thành phố',
+        popularity: 'Rất cao',
+        slug: 'ha-noi',
+        temperature: '15-33°C',
+        condition: 'Nắng, mưa theo mùa',
+        humidity: '70-90%',
+        rainfall: 'Trung bình',
+        flightTime: 'Có sân bay quốc tế Nội Bài',
+        ferryTime: 'Không có',
+        carTime: 'N/A'
+      },
+      {
+        city: 'Hội An',
+        country: 'Việt Nam',
+        province: 'Quảng Nam',
+        description: 'Phố cổ UNESCO với đèn lồng, chùa Cầu, ẩm thực đường phố.',
+        image: 'https://images.unsplash.com/photo-1549887534-3db1bd59dcca?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1549887534-3db1bd59dcca?w=1200&h=600&fit=crop',
+        rating: 4.8,
+        reviewCount: 15000,
+        hotels: 200,
+        fromPrice: 500000,
+        toPrice: 4000000,
+        bestTime: 'Tháng 2 - Tháng 9',
+        category: 'Di sản',
+        popularity: 'Rất cao',
+        slug: 'hoi-an',
+        temperature: '20-34°C',
+        condition: 'Khí hậu ôn hòa',
+        humidity: '70-85%',
+        rainfall: 'Trung bình',
+        flightTime: '30 phút từ sân bay Đà Nẵng',
+        ferryTime: 'Không có',
+        carTime: '30 phút từ Đà Nẵng'
+      },
+      {
+        city: 'Hạ Long',
+        country: 'Việt Nam',
+        province: 'Quảng Ninh',
+        description: 'Kỳ quan thiên nhiên thế giới - vịnh Hạ Long.',
+        image: 'https://images.unsplash.com/photo-1589391886645-d51941c10f6c?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1589391886645-d51941c10f6c?w=1200&h=600&fit=crop',
+        rating: 4.9,
+        reviewCount: 17000,
+        hotels: 220,
+        fromPrice: 1000000,
+        toPrice: 6000000,
+        bestTime: 'Tháng 3 - Tháng 6',
+        category: 'Biển',
+        popularity: 'Rất cao',
+        slug: 'ha-long',
+        temperature: '22-33°C',
+        condition: 'Nắng, có mưa',
+        humidity: '70-85%',
+        rainfall: 'Trung bình',
+        flightTime: '1 giờ từ Hà Nội',
+        ferryTime: 'Có tàu du lịch',
+        carTime: '2.5 giờ từ Hà Nội'
+      },
+      {
+        city: 'Đà Lạt',
+        country: 'Việt Nam',
+        province: 'Lâm Đồng',
+        description: 'Thành phố ngàn hoa với khí hậu mát mẻ quanh năm.',
+        image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=600&fit=crop',
+        rating: 4.8,
+        reviewCount: 14000,
+        hotels: 180,
+        fromPrice: 600000,
+        toPrice: 5000000,
+        bestTime: 'Quanh năm',
+        category: 'Núi',
+        popularity: 'Rất cao',
+        slug: 'da-lat',
+        temperature: '15-25°C',
+        condition: 'Mát, sương mù',
+        humidity: '70-85%',
+        rainfall: 'Trung bình',
+        flightTime: '1 giờ từ TP.HCM',
+        ferryTime: 'Không có',
+        carTime: '7 giờ từ TP.HCM'
+      },
+      {
+        city: 'Huế',
+        country: 'Việt Nam',
+        province: 'Thừa Thiên - Huế',
+        description: 'Cố đô Huế với Đại Nội, chùa Thiên Mụ, lăng tẩm triều Nguyễn.',
+        image: 'https://images.unsplash.com/photo-1622034683782-6e79fba399a7?w=800&h=600&fit=crop',
+        heroImage: 'https://images.unsplash.com/photo-1622034683782-6e79fba399a7?w=1200&h=600&fit=crop',
+        rating: 4.7,
+        reviewCount: 10000,
+        hotels: 160,
+        fromPrice: 500000,
+        toPrice: 4000000,
+        bestTime: 'Tháng 1 - Tháng 8',
+        category: 'Văn hóa',
+        popularity: 'Cao',
+        slug: 'hue',
+        temperature: '20-35°C',
+        condition: 'Nắng nóng, có mưa',
+        humidity: '70-90%',
+        rainfall: 'Cao',
+        flightTime: '1 giờ từ Hà Nội',
+        ferryTime: 'Không có',
+        carTime: '2 giờ từ Đà Nẵng'
       }
     ]
   })
 
-  // Create destination activities for Phu Quoc
-  await prisma.destinationActivity.createMany({
+  const allDestinations = await prisma.destination.findMany()
+
+  // ================== HOTELS ==================
+  for (const dest of allDestinations) {
+    await prisma.hotel.createMany({
+      data: [
+        {
+          name: `Hotel Luxury ${dest.city}`,
+          image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
+          location: `${dest.city}, ${dest.province}`,
+          rating: 4.5,
+          reviewCount: 1000,
+          price: 2500000,
+          originalPrice: 4000000,
+          discount: '35%',
+          description: `Khách sạn sang trọng tại ${dest.city}`,
+          destinationId: dest.id
+        },
+        {
+          name: `Resort Paradise ${dest.city}`,
+          image: 'https://images.unsplash.com/photo-1501117716987-c8e86b5356df?w=800&h=600&fit=crop',
+          location: `${dest.city}, ${dest.province}`,
+          rating: 4.7,
+          reviewCount: 1500,
+          price: 3200000,
+          originalPrice: 5000000,
+          discount: '30%',
+          description: `Resort cao cấp view đẹp tại ${dest.city}`,
+          destinationId: dest.id
+        }
+      ]
+    })
+  }
+
+  // ================== FLIGHTS ==================
+  await prisma.flight.createMany({
     data: [
       {
-        destinationId: phuQuoc.id,
-        name: 'Tắm biển',
-        icon: '🏊‍♂️',
-        description: 'Thư giãn tại những bãi biển đẹp nhất Việt Nam'
+        airline: 'Vietnam Airlines',
+        flightNumber: 'VN123',
+        departure: 'Hà Nội (HAN)',
+        arrival: 'TP.HCM (SGN)',
+        departureTime: '08:00',
+        arrivalTime: '10:15',
+        duration: '2h 15m',
+        price: 1200000,
+        originalPrice: 1800000,
+        discount: '33%',
+        stops: 'Bay thẳng',
+        aircraft: 'Airbus A350',
+        class: 'Economy',
+        availableSeats: 45,
+        departureDate: '2025-09-01'
       },
       {
-        destinationId: phuQuoc.id,
-        name: 'Lặn ngắm san hô',
-        icon: '🤿',
-        description: 'Khám phá thế giới dưới đáy biển đầy màu sắc'
+        airline: 'VietJet Air',
+        flightNumber: 'VJ456',
+        departure: 'Hà Nội (HAN)',
+        arrival: 'Đà Nẵng (DAD)',
+        departureTime: '14:30',
+        arrivalTime: '15:45',
+        duration: '1h 15m',
+        price: 599000,
+        originalPrice: 1200000,
+        discount: '50%',
+        stops: 'Bay thẳng',
+        aircraft: 'Airbus A320',
+        class: 'Economy',
+        availableSeats: 23,
+        departureDate: '2025-09-05'
       },
       {
-        destinationId: phuQuoc.id,
-        name: 'Khám phá đảo',
-        icon: '🚗',
-        description: 'Thuê xe máy khám phá những con đường ven biển'
+        airline: 'Bamboo Airways',
+        flightNumber: 'QH789',
+        departure: 'TP.HCM (SGN)',
+        arrival: 'Phú Quốc (PQC)',
+        departureTime: '09:00',
+        arrivalTime: '10:00',
+        duration: '1h',
+        price: 800000,
+        originalPrice: 1200000,
+        discount: '33%',
+        stops: 'Bay thẳng',
+        aircraft: 'Embraer 190',
+        class: 'Economy',
+        availableSeats: 30,
+        departureDate: '2025-09-10'
       },
       {
-        destinationId: phuQuoc.id,
-        name: 'Thưởng thức hải sản',
-        icon: '🦐',
-        description: 'Nếm thử những món hải sản tươi ngon đặc trưng'
-      },
-      {
-        destinationId: phuQuoc.id,
-        name: 'Ngắm hoàng hôn',
-        icon: '🌅',
-        description: 'Chiêm ngưỡng hoàng hôn tuyệt đẹp tại Sunset Sanato'
-      },
-      {
-        destinationId: phuQuoc.id,
-        name: 'Tham quan làng chài',
-        icon: '🐟',
-        description: 'Tìm hiểu văn hóa và cuộc sống của người dân địa phương'
+        airline: 'Vietnam Airlines',
+        flightNumber: 'VN101',
+        departure: 'Đà Nẵng (DAD)',
+        arrival: 'Đà Lạt (DLI)',
+        departureTime: '07:30',
+        arrivalTime: '09:00',
+        duration: '1h30m',
+        price: 1200000,
+        originalPrice: 1600000,
+        discount: '25%',
+        stops: 'Bay thẳng',
+        aircraft: 'ATR72',
+        class: 'Economy',
+        availableSeats: 20,
+        departureDate: '2025-09-12'
       }
     ]
   })
 
-  // Create hotels
-  const intercontinental = await prisma.hotel.create({
-    data: {
-      name: 'InterContinental Phú Quốc Long Beach Resort',
-      image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
-      location: 'Phú Quốc, Kiên Giang',
-      rating: 4.9,
-      reviewCount: 2847,
-      price: 4500000,
-      originalPrice: 6500000,
-      discount: '31%',
-      description: 'Khách sạn 5 sao đẳng cấp quốc tế với view biển tuyệt đẹp và dịch vụ hoàn hảo',
-      destinationId: phuQuoc.id
-    }
-  })
+  // ================== TOUR PACKAGES ==================
+  for (const dest of allDestinations.slice(0, 10)) {
+    await prisma.tourPackage.create({
+      data: {
+        title: `Combo ${dest.city} 3N2Đ`,
+        subtitle: `Khám phá ${dest.city} với khách sạn + vé máy bay + tour`,
+        image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?w=1200&h=800&fit=crop',
+        badge: 'HOT',
+        discount: 'Giảm 30%',
+        originalPrice: 4000000,
+        price: 2800000,
+        duration: '3 ngày 2 đêm',
+        groupSize: '2-10 người',
+        departure: 'Hà Nội',
+        destinationId: dest.id,
+        rating: 4.7,
+        reviewCount: 200,
+        validUntil: '2025-12-31',
+        category: 'Combo'
+      }
+    })
+  }
 
-  const jwMarriott = await prisma.hotel.create({
-    data: {
-      name: 'JW Marriott Phú Quốc Emerald Bay',
-      image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&h=600&fit=crop',
-      location: 'Phú Quốc, Kiên Giang',
-      rating: 4.8,
-      reviewCount: 2156,
-      price: 5200000,
-      originalPrice: 7200000,
-      discount: '28%',
-      description: 'Resort sang trọng với thiết kế độc đáo và dịch vụ đẳng cấp thế giới',
-      destinationId: phuQuoc.id
-    }
-  })
+     // ================== ACTIVITIES ==================
+  const activitiesData = [
+    { title: 'Lặn ngắm san hô', category: 'Biển', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop' },
+    { title: 'Đi thuyền kayak', category: 'Biển', image: 'https://images.unsplash.com/photo-1526483360412-f4dbaf036963?w=800&h=600&fit=crop' },
+    { title: 'Trekking Fansipan', category: 'Leo núi', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=600&fit=crop' },
+    { title: 'Khám phá phố cổ', category: 'Văn hóa', image: 'https://images.unsplash.com/photo-1549887534-3db1bd59dcca?w=800&h=600&fit=crop' },
+    { title: 'Chèo SUP', category: 'Thể thao nước', image: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&h=600&fit=crop' },
+    { title: 'Tour ẩm thực đường phố', category: 'Ẩm thực', image: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800&h=600&fit=crop' },
+    { title: 'Khám phá hang động', category: 'Phiêu lưu', image: 'https://images.unsplash.com/photo-1526481280691-19585f32e7f7?w=800&h=600&fit=crop' },
+    { title: 'Ngắm bình minh biển', category: 'Relax', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop' },
+    { title: 'Cắm trại trên đồi', category: 'Camping', image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=600&fit=crop' },
+    { title: 'Khám phá chợ nổi', category: 'Văn hóa', image: 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&h=600&fit=crop' },
+  ]
 
-  // Create hotel amenities
-  await prisma.hotelAmenity.createMany({
-    data: [
-      { hotelId: intercontinental.id, name: 'Hồ bơi vô cực' },
-      { hotelId: intercontinental.id, name: 'Spa & Wellness' },
-      { hotelId: intercontinental.id, name: 'Nhà hàng 5 sao' },
-      { hotelId: intercontinental.id, name: 'Phòng gym' },
-      { hotelId: intercontinental.id, name: 'Kids club' },
-      { hotelId: intercontinental.id, name: 'Golf course' },
-      { hotelId: jwMarriott.id, name: 'Villa riêng biệt' },
-      { hotelId: jwMarriott.id, name: 'Bãi biển riêng' },
-      { hotelId: jwMarriott.id, name: 'Golf course' },
-      { hotelId: jwMarriott.id, name: 'Kids club' },
-      { hotelId: jwMarriott.id, name: 'Spa' },
-      { hotelId: jwMarriott.id, name: 'Nhà hàng' }
-    ]
-  })
+  for (const activity of activitiesData) {
+    await prisma.activity.create({
+      data: {
+        title: activity.title,
+        subtitle: `${activity.title} - Trải nghiệm tuyệt vời`,
+        image: activity.image,
+        category: activity.category,
+        difficulty: 'Trung bình',
+        ageRequirement: '12+',
+        schedule: 'Hàng ngày',
+        bestTime: 'Quanh năm',
+        location: 'Việt Nam',
+        price: Math.floor(200000 + Math.random() * 500000),
+        originalPrice: Math.floor(500000 + Math.random() * 800000),
+        discount: '10%',
+        duration: `${1 + Math.floor(Math.random() * 3)} giờ`,
+        groupSize: '1-10 người',
+        rating: Math.round((3.5 + Math.random() * 1.5) * 10) / 10,
+        reviewCount: Math.floor(50 + Math.random() * 300),
+      }
+    })
+  }
 
-  // Create hotel room types
-  await prisma.hotelRoomType.createMany({
-    data: [
-      { hotelId: intercontinental.id, name: 'Deluxe Ocean View' },
-      { hotelId: intercontinental.id, name: 'Suite Premium' },
-      { hotelId: intercontinental.id, name: 'Villa Beachfront' },
-      { hotelId: jwMarriott.id, name: 'Garden Villa' },
-      { hotelId: jwMarriott.id, name: 'Ocean Villa' },
-      { hotelId: jwMarriott.id, name: 'Presidential Suite' }
-    ]
-  })
+  // ================== INSURANCE ==================
+  const insuranceData = [
+    {
+      name: 'Bảo hiểm cơ bản',
+      coverage: 'Tai nạn, y tế cơ bản',
+      price: 200000,
+      provider: 'BaoViet',
+      image: 'https://images.unsplash.com/photo-1588776814546-ec6f89d9cf1d?w=800&h=600&fit=crop'
+    },
+    {
+      name: 'Bảo hiểm nâng cao',
+      coverage: 'Tai nạn, y tế, hành lý',
+      price: 500000,
+      provider: 'AIA',
+      image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=600&fit=crop'
+    },
+    {
+      name: 'Bảo hiểm VIP',
+      coverage: 'Toàn diện: tai nạn, y tế, hành lý, hoãn chuyến',
+      price: 1000000,
+      provider: 'Prudential',
+      image: 'https://images.unsplash.com/photo-1549921296-3a6b5a0c2c8d?w=800&h=600&fit=crop'
+    },
+  ]
 
-  // Create flights
-  const flight1 = await prisma.flight.create({
-    data: {
-      airline: 'Vietnam Airlines',
-      flightNumber: 'VN123',
-      departure: 'Hà Nội (HAN)',
-      arrival: 'TP.HCM (SGN)',
-      departureTime: '08:00',
-      arrivalTime: '10:15',
-      duration: '2h 15m',
-      price: 1200000,
-      originalPrice: 1800000,
-      discount: '33%',
-      stops: 'Bay thẳng',
-      aircraft: 'Airbus A350',
-      class: 'Economy',
-      availableSeats: 45,
-      departureDate: '2024-02-15'
-    }
-  })
+  for (const ins of insuranceData) {
+    await prisma.insurance.create({
+      data: {
+        title: ins.name,
+        subtitle: ins.coverage,
+        image: ins.image,
+        type: ins.provider,
+        price: ins.price,
+        duration: '1-30 ngày',
+        coverage: ins.coverage,
+        rating: 4.5,
+        reviewCount: 0,
+        claimProcess: 'Xử lý trong 7-14 ngày',
+        maxAge: 75,
+        preExistingConditions: false
+      }
+    })
+  }
 
-  const flight2 = await prisma.flight.create({
-    data: {
-      airline: 'VietJet Air',
-      flightNumber: 'VJ456',
-      departure: 'Hà Nội (HAN)',
-      arrival: 'Đà Nẵng (DAD)',
-      departureTime: '14:30',
-      arrivalTime: '15:45',
-      duration: '1h 15m',
-      price: 599000,
-      originalPrice: 1200000,
-      discount: '50%',
-      stops: 'Bay thẳng',
-      aircraft: 'Airbus A320',
-      class: 'Economy',
-      availableSeats: 23,
-      departureDate: '2024-02-15'
-    }
-  })
+  // ================== USERS ==================
+  const usersData = [
+    { name: 'Nguyen Van A', email: 'a@example.com', password: '123456', avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
+    { name: 'Tran Thi B', email: 'b@example.com', password: '123456', avatar: 'https://randomuser.me/api/portraits/women/44.jpg' },
+    { name: 'Le Van C', email: 'c@example.com', password: '123456', avatar: 'https://randomuser.me/api/portraits/men/65.jpg' },
+    { name: 'Pham Thi D', email: 'd@example.com', password: '123456', avatar: 'https://randomuser.me/api/portraits/women/12.jpg' },
+    { name: 'Hoang Van E', email: 'e@example.com', password: '123456', avatar: 'https://randomuser.me/api/portraits/men/78.jpg' },
+  ]
 
-  // Create flight features
-  await prisma.flightFeature.createMany({
-    data: [
-      { flightId: flight1.id, name: 'Hành lý 7kg' },
-      { flightId: flight1.id, name: 'Đổi vé miễn phí' },
-      { flightId: flight1.id, name: 'Bữa ăn' },
-      { flightId: flight1.id, name: 'WiFi' },
-      { flightId: flight2.id, name: 'Hành lý 7kg' },
-      { flightId: flight2.id, name: 'Đổi vé' },
-      { flightId: flight2.id, name: 'Bữa ăn' }
-    ]
-  })
+  for (const user of usersData) {
+    await prisma.user.create({ data: user })
+  }
 
-  // Create tour packages
-  const package1 = await prisma.tourPackage.create({
-    data: {
-      title: 'Combo Phú Quốc 3N2Đ - Khám phá đảo ngọc',
-      subtitle: 'Khách sạn 4★ + Vé máy bay + Ăn sáng + Tour khám phá',
-      image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-      badge: 'HOT DEAL',
-      discount: 'Giảm 35%',
-      originalPrice: 4500000,
-      price: 2990000,
-      duration: '3 ngày 2 đêm',
-      groupSize: '2-8 người',
-      departure: 'TP.HCM',
-      destinationId: phuQuoc.id,
-      rating: 4.8,
-      reviewCount: 1247,
-      validUntil: '2024-02-29',
-      category: 'Combo'
-    }
-  })
-
-  // Create package highlights
-  await prisma.packageHighlight.createMany({
-    data: [
-      { packageId: package1.id, description: 'Khách sạn 4 sao view biển' },
-      { packageId: package1.id, description: 'Vé máy bay khứ hồi' },
-      { packageId: package1.id, description: 'Ăn sáng buffet' },
-      { packageId: package1.id, description: 'Tour khám phá đảo' },
-      { packageId: package1.id, description: 'Đưa đón sân bay' },
-      { packageId: package1.id, description: 'Hướng dẫn viên tiếng Việt' }
-    ]
-  })
-
-  // Tour package images
-  // @ts-ignore - table exists after prisma generate
-  await prisma.tourPackageImage.createMany({
-    data: [
-      { packageId: package1.id, url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=800&fit=crop', position: 1 },
-      { packageId: package1.id, url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&h=800&fit=crop', position: 2 },
-      { packageId: package1.id, url: 'https://images.unsplash.com/photo-1501117716987-c8e86b5356df?w=1200&h=800&fit=crop', position: 3 }
-    ]
-  })
-
-  // Tour package reviews
-  // @ts-ignore - table exists after prisma generate
-  await prisma.tourPackageReview.createMany({
-    data: [
-      { packageId: package1.id, name: 'Trần Minh', rating: 5, comment: 'Tour rất đáng tiền, dịch vụ tốt!', photos: [] },
-      { packageId: package1.id, name: 'Lê Thu', rating: 4.5, comment: 'Lịch trình hợp lý, hướng dẫn viên thân thiện.', photos: [] }
-    ]
-  })
-
-  // Create activities
-  const activity1 = await prisma.activity.create({
-    data: {
-      title: 'Lặn ngắm san hô Phú Quốc',
-      subtitle: 'Khám phá thế giới dưới đáy biển với hướng dẫn viên chuyên nghiệp',
-      image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-      category: 'Thể thao biển',
-      location: 'Phú Quốc, Kiên Giang',
-      duration: '3-4 giờ',
-      groupSize: '2-8 người',
-      price: 850000,
-      originalPrice: 1200000,
-      discount: '29%',
-      rating: 4.8,
-      reviewCount: 567,
-      difficulty: 'Trung bình',
-      ageRequirement: '12+',
-      schedule: '08:00 - 12:00 hàng ngày',
-      bestTime: 'Tháng 11 - Tháng 4',
-      destinationId: phuQuoc.id
-    }
-  })
-
-  // Create activity highlights
-  await prisma.activityHighlight.createMany({
-    data: [
-      { activityId: activity1.id, highlight: 'Lặn tại 3 điểm san hô đẹp nhất' },
-      { activityId: activity1.id, highlight: 'Hướng dẫn viên PADI certified' },
-      { activityId: activity1.id, highlight: 'Thiết bị chất lượng cao' },
-      { activityId: activity1.id, highlight: 'Ảnh kỷ niệm miễn phí' }
-    ]
-  })
-
-  // Create insurance
-  const insurance1 = await prisma.insurance.create({
-    data: {
-      title: 'Bảo hiểm du lịch cơ bản',
-      subtitle: 'Bảo vệ toàn diện cho chuyến du lịch của bạn',
-      image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-      type: 'Cơ bản',
-      price: 150000,
-      duration: '1-30 ngày',
-      coverage: '50 triệu VND',
-      rating: 4.5,
-      reviewCount: 892,
-      claimProcess: 'Đơn giản, nhanh chóng trong 7-14 ngày',
-      maxAge: 70,
-      preExistingConditions: false
-    }
-  })
-
-  // Create insurance features
-  await prisma.insuranceFeature.createMany({
-    data: [
-      { insuranceId: insurance1.id, feature: 'Bảo hiểm y tế khẩn cấp' },
-      { insuranceId: insurance1.id, feature: 'Bảo hiểm tai nạn' },
-      { insuranceId: insurance1.id, feature: 'Bảo hiểm hành lý' },
-      { insuranceId: insurance1.id, feature: 'Hỗ trợ khẩn cấp 24/7' },
-      { insuranceId: insurance1.id, feature: 'Bồi thường chuyến bay bị hủy' },
-      { insuranceId: insurance1.id, feature: 'Bảo hiểm trách nhiệm dân sự' }
-    ]
-  })
-
-  // Create insurance destinations
-  await prisma.insuranceDestination.createMany({
-    data: [
-      { insuranceId: insurance1.id, destination: 'Toàn thế giới' }
-    ]
-  })
-
-  // Create insurance exclusions
-  await prisma.insuranceExclusion.createMany({
-    data: [
-      { insuranceId: insurance1.id, exclusion: 'Thể thao mạo hiểm' },
-      { insuranceId: insurance1.id, exclusion: 'Bệnh có sẵn' },
-      { insuranceId: insurance1.id, exclusion: 'Chiến tranh, bạo động' }
-    ]
-  })
-
-  // Create sample user
-  const user = await prisma.user.create({
-    data: {
-      email: 'test@example.com',
-      name: 'Nguyễn Văn A',
-      phone: '0123456789'
-    }
-  })
-
-  console.log('✅ Database seeding completed successfully!')
-  console.log(`Created ${await prisma.destination.count()} destinations`)
-  console.log(`Created ${await prisma.hotel.count()} hotels`)
-  console.log(`Created ${await prisma.flight.count()} flights`)
-  console.log(`Created ${await prisma.tourPackage.count()} tour packages`)
-  console.log(`Created ${await prisma.activity.count()} activities`)
-  console.log(`Created ${await prisma.insurance.count()} insurance plans`)
-  console.log(`Created ${await prisma.user.count()} users`)
+  console.log('✅ Seeding completed successfully!')
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error during seeding:', e)
+    console.error(e)
     process.exit(1)
   })
   .finally(async () => {
     await prisma.$disconnect()
-  }) 
+  })

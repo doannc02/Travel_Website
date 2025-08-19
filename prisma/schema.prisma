@@ -15,6 +15,7 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
+  password  String
   phone     String?
   avatar    String?
   createdAt DateTime @default(now())
@@ -229,6 +230,8 @@ model TourPackage {
   bookings      PackageBooking[]
   images        TourPackageImage[]
   reviews       TourPackageReview[]
+  sections      TourPackageSection[]
+  stops         TourPackageStop[]
 
   @@map("tour_packages")
 }
@@ -251,6 +254,9 @@ model PackageItinerary {
   packageId Int
   day       String
   content   String
+  startTime String?
+  transport String?
+  meals     String?
 
   // Relations
   package TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
@@ -559,4 +565,41 @@ model TourPackageReview {
   user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("tour_package_reviews")
+}
+
+model TourPackageSection {
+  id         Int      @id @default(autoincrement())
+  packageId  Int
+  title      String
+  content    String
+  photos     String[]
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  package    TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("tour_package_sections")
+}
+
+model TourPackageStop {
+  id           Int      @id @default(autoincrement())
+  packageId    Int
+  title        String
+  description  String
+  guide        String
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  photos       String[]
+  position     Int      @default(0)
+  tips         String[]
+  bestTime     String?
+  mapThumb     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  package      TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("tour_package_stops")
 }
