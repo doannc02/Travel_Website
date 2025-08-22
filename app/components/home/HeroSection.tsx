@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   MapPin,
@@ -22,21 +23,24 @@ import {
 } from "lucide-react";
 
 export default function TravelokaBanner() {
+  const router = useRouter();
   const [activeMainTab, setActiveMainTab] = useState("Hotels");
   const [activeSubTab, setActiveSubTab] = useState("Hotels");
   const [checkInDate, setCheckInDate] = useState("2025-08-17");
   const [checkOutDate, setCheckOutDate] = useState("2025-08-18");
   const [guests, setGuests] = useState("2 Adult(s), 0 Child, 1 Room");
   const [destination, setDestination] = useState("");
+  const [showGuestPicker, setShowGuestPicker] = useState(false);
+  const [guestCount, setGuestCount] = useState({ adults: 2, children: 0, rooms: 1 });
 
   const mainTabs = [
-    { id: "Hotels", label: "Hotels", icon: Hotel },
-    { id: "Flights", label: "Flights", icon: Plane },
-    { id: "Bus & Shuttle", label: "Bus & Shuttle", icon: Bus },
-    { id: "Airport Transfer", label: "Airport Transfer", icon: Car },
-    { id: "Car Rental", label: "Car Rental", icon: Car },
-    { id: "Things to Do", label: "Things to Do", icon: Mountain },
-    { id: "More", label: "More", icon: Grid3X3 },
+    { id: "Hotels", label: "Hotels", icon: Hotel, path: "/hotels" },
+    { id: "Flights", label: "Flights", icon: Plane, path: "/flights" },
+    { id: "Bus & Shuttle", label: "Bus & Shuttle", icon: Bus, path: "/bus" },
+    { id: "Airport Transfer", label: "Airport Transfer", icon: Car, path: "/transfer" },
+    { id: "Car Rental", label: "Car Rental", icon: Car, path: "/car-rental" },
+    { id: "Things to Do", label: "Things to Do", icon: Mountain, path: "/activities" },
+    { id: "More", label: "More", icon: Grid3X3, path: "/packages" },
   ];
 
   const hotelSubTabs = [
@@ -44,6 +48,46 @@ export default function TravelokaBanner() {
     { id: "Villa", label: "Villa", icon: Home },
     { id: "Apartment", label: "Apartment", icon: Building2 },
   ];
+
+  const handleSearch = () => {
+    if (!destination.trim()) {
+      alert("Vui lòng nhập điểm đến");
+      return;
+    }
+
+    // Navigate based on active tab
+    const activeTab = mainTabs.find(tab => tab.id === activeMainTab);
+    if (activeTab) {
+      const searchParams = new URLSearchParams({
+        destination: destination,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        guests: `${guestCount.adults} Adult(s), ${guestCount.children} Child, ${guestCount.rooms} Room`
+      });
+      
+      router.push(`${activeTab.path}?${searchParams.toString()}`);
+    }
+  };
+
+  const updateGuestString = () => {
+    setGuests(`${guestCount.adults} Adult(s), ${guestCount.children} Child, ${guestCount.rooms} Room`);
+  };
+
+  useEffect(() => {
+    updateGuestString();
+  }, [guestCount]);
+
+  const handleGuestChange = (type: 'adults' | 'children' | 'rooms', action: 'increase' | 'decrease') => {
+    setGuestCount(prev => {
+      const newCount = { ...prev };
+      if (action === 'increase') {
+        newCount[type]++;
+      } else if (action === 'decrease' && newCount[type] > 0) {
+        newCount[type]--;
+      }
+      return newCount;
+    });
+  };
 
   return (
     <div
@@ -177,12 +221,75 @@ export default function TravelokaBanner() {
                     type="text"
                     value={guests}
                     readOnly
+                    onClick={() => setShowGuestPicker(!showGuestPicker)}
                     className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                   />
+                  
+                  {/* Guest Picker Dropdown */}
+                  {showGuestPicker && (
+                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 mt-1 p-4">
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span>Adults</span>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleGuestChange('adults', 'decrease')}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center">{guestCount.adults}</span>
+                            <button
+                              onClick={() => handleGuestChange('adults', 'increase')}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Children</span>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleGuestChange('children', 'decrease')}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center">{guestCount.children}</span>
+                            <button
+                              onClick={() => handleGuestChange('children', 'increase')}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Rooms</span>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleGuestChange('rooms', 'decrease')}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center">{guestCount.rooms}</span>
+                            <button
+                              onClick={() => handleGuestChange('rooms', 'increase')}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <button
                   className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-r-lg font-semibold transition-colors flex items-center space-x-2"
-                  onClick={() => alert("Searching...")}
+                  onClick={handleSearch}
                 >
                   <Search className="w-5 h-5" />
                 </button>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Hotel,
   Plane,
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 
 export default function ModernServicesSection() {
+  const router = useRouter();
   const [activeService, setActiveService] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
 
@@ -59,7 +61,7 @@ export default function ModernServicesSection() {
       name: "Tour du lịch",
       description: "Khám phá những điểm đến tuyệt vời",
       icon: Map,
-      link: "/tours",
+      link: "/packages",
       color: "from-purple-500 to-indigo-700",
       bgColor: "bg-purple-50",
       stats: "1,000+ tour",
@@ -113,11 +115,23 @@ export default function ModernServicesSection() {
   ];
 
   const quickServices = [
-    { name: "Visa du lịch", icon: Shield, count: "150+ quốc gia" },
-    { name: "Bảo hiểm du lịch", icon: Heart, count: "Bảo vệ toàn diện" },
-    { name: "Đổi tiền", icon: Globe, count: "Tỉ giá tốt nhất" },
-    { name: "Wifi du lịch", icon: Zap, count: "Kết nối toàn cầu" },
+    { name: "Visa du lịch", icon: Shield, count: "150+ quốc gia", link: "/visa" },
+    { name: "Bảo hiểm du lịch", icon: Heart, count: "Bảo vệ toàn diện", link: "/insurance" },
+    { name: "Đổi tiền", icon: Globe, count: "Tỉ giá tốt nhất", link: "/currency" },
+    { name: "Wifi du lịch", icon: Zap, count: "Kết nối toàn cầu", link: "/wifi" },
   ];
+
+  const handleServiceClick = (service: any) => {
+    router.push(service.link);
+  };
+
+  const handleQuickServiceClick = (service: any) => {
+    router.push(service.link);
+  };
+
+  const handlePlanTripClick = () => {
+    router.push('/packages');
+  };
 
   return (
     <div className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -151,6 +165,7 @@ export default function ModernServicesSection() {
                   <div
                     key={index}
                     className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors cursor-pointer group"
+                    onClick={() => handleQuickServiceClick(service)}
                   >
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                       <Icon className="w-6 h-6 text-blue-600" />
@@ -180,7 +195,7 @@ export default function ModernServicesSection() {
                 className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer transform hover:-translate-y-2"
                 onMouseEnter={() => setHoveredCard(service.id)}
                 onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => setActiveService(service.id)}
+                onClick={() => handleServiceClick(service)}
               >
                 {/* Service Image */}
                 <div className="relative h-48 overflow-hidden">
@@ -269,7 +284,10 @@ export default function ModernServicesSection() {
 
         {/* Call to Action */}
         <div className="text-center mt-12">
-          <button className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <button 
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            onClick={handlePlanTripClick}
+          >
             <Calendar className="w-5 h-5" />
             Bắt đầu lên kế hoạch ngay
           </button>

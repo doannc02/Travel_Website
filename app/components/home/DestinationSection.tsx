@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { useApi } from "../../hooks/useApi";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import DestinationCard from "./DestinationCard";
 
@@ -26,10 +26,32 @@ interface Destination {
 }
 
 export default function DestinationSection() {
-// Sửa thành:
-const { data, loading, error } = useApi<any>("/api/destinations", { immediate: true }); // Thêm option immediate
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  console.log(data, 'data here')
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/destinations');
+        const result = await response.json();
+        
+        if (result.success) {
+          setData(result.data);
+        } else {
+          setError(result.message || 'Failed to fetch destinations');
+        }
+      } catch (err) {
+        setError('Network error occurred');
+        console.error('Error fetching destinations:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDestinations();
+  }, []);
 
   if (loading) {
     return (
@@ -55,7 +77,7 @@ const { data, loading, error } = useApi<any>("/api/destinations", { immediate: t
           </p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             Thử lại
           </button>
@@ -89,7 +111,7 @@ const { data, loading, error } = useApi<any>("/api/destinations", { immediate: t
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {(data?? []).map((destination : any, index : number) => (
+          {(data || []).slice(0, 8).map((destination: any, index: number) => (
             <DestinationCard 
               key={destination.id}
               destination={destination}
