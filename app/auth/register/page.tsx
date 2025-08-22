@@ -114,7 +114,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
             <MotionH2
@@ -512,8 +512,8 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                <div className="border-t pt-6 mt-6">
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="border-t pt-4 pb-2 mt-5">
+                  <p className="text-sm text-gray-600 mb-3">
                     Đã có tài khoản?
                   </p>
                   <Link href="/auth/login">

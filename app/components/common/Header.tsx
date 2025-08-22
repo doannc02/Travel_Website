@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MotionDiv, MotionButton } from "./MotionWrapper";
+import { usePathname } from "next/navigation";
 
 // Header navigation data
 const headerData = {
@@ -17,8 +18,8 @@ const headerData = {
     { text: "Bảo hiểm", url: "/insurance", icon: "🛡️" },
   ],
   userMenu: [
-    { text: "Đăng nhập", url: "/login", icon: "👤" },
-    { text: "Đăng ký", url: "/register", icon: "📝" },
+    { text: "Đăng nhập", url: "/auth/login", icon: "👤" },
+    { text: "Đăng ký", url: "/auth/register", icon: "📝" },
     { text: "Hỗ trợ", url: "/support", icon: "💬" },
   ],
   languages: [
@@ -36,6 +37,15 @@ export default function Header() {
   const [currentLanguage, setCurrentLanguage] = useState(
     headerData.languages[0]
   );
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+useEffect(() => {
+  const token = localStorage.getItem("token"); // hoặc "user"
+  setIsLoggedIn(!!token);
+}, []);
+
+  const pathname = usePathname();
 
   // Handle scroll effect
   useEffect(() => {
@@ -84,11 +94,14 @@ export default function Header() {
               >
                 <Link
                   href={item.url}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-300 group"
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 group
+                ${
+                pathname === item.url
+                  ? "bg-red-600 text-white shadow-md"
+                  : "hover:bg-red-50 hover:text-red-600"
+                }`}
                 >
-                  <span className="text-lg group-hover:scale-110 transition-transform duration-300">
-                    {item.icon}
-                  </span>
+                  <span className="text-lg">{item.icon}</span>
                   <span className="font-medium">{item.text}</span>
                 </Link>
               </MotionDiv>
