@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../../components/common/MotionWrapper';
 import Link from 'next/link';
-
+// app/auth/login/page.tsx
 // Type definitions
 interface FormData {
   email: string;
@@ -31,23 +31,52 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors: Errors = {};
-
-    if (!formData.email.trim()) newErrors.email = 'Vui lòng nhập email';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email không hợp lệ';
-    
-    if (!formData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
-    else if (formData.password.length < 6) newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-
+  
+    if (!formData.email.trim()) newErrors.email = "Vui lòng nhập email";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email không hợp lệ";
+  
+    if (!formData.password) newErrors.password = "Vui lòng nhập mật khẩu";
+    else if (formData.password.length < 6)
+      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+  
     setErrors(newErrors);
-
+  
     if (Object.keys(newErrors).length === 0) {
-      console.log('Login attempt:', formData);
-      // Handle login logic here
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          alert(data.error || "Đăng nhập thất bại");
+          return;
+        }
+  
+        // ✅ Lưu token vào localStorage (nếu cần rememberMe)
+        if (formData.rememberMe) {
+          localStorage.setItem("token", data.token);
+        }
+  
+        alert("Đăng nhập thành công!");
+        window.location.href = "/"; // chuyển về trang chủ
+      } catch (err) {
+        console.error("Login error:", err);
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+      }
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12">

@@ -5,17 +5,20 @@ import {
   PencilIcon, 
   TrashIcon, 
   EyeIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
 import { MotionDiv, MotionH2, MotionH3, MotionButton } from '../../components/common/MotionWrapper';
+import DestinationModal from './DestinationModal';
 
 interface Destination {
   id: number;
   city: string;
-  country: string;
   province: string;
+  country: string;
   description: string;
   image: string;
+  heroImage: string | null;
   rating: number;
   reviewCount: number;
   hotels: number;
@@ -25,79 +28,84 @@ interface Destination {
   category: string;
   popularity: string;
   slug: string;
+  temperature: string | null;
+  condition: string | null;
+  humidity: string | null;
+  rainfall: string | null;
+  flightTime: string | null;
+  ferryTime: string | null;
+  carTime: string | null;
   createdAt: string;
+  updatedAt: string;
+  _count: {
+    hotels_relation: number;
+    activities_relation: number;
+    packages_relation: number;
+    reviews: number;
+  };
 }
 
 export default function DestinationsPage() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingDestination, setEditingDestination] = useState<Destination | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const categories = [
+    'Biển đảo',
+    'Núi rừng',
+    'Thành phố',
+    'Văn hóa lịch sử',
+    'Ẩm thực',
+    'Thiên nhiên'
+  ];
 
   useEffect(() => {
     fetchDestinations();
-  }, []);
+  }, [currentPage, categoryFilter]);
 
   const fetchDestinations = async () => {
     try {
-      setError(null);
-      const response = await fetch('/api/admin/destinations');
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '10',
+        ...(searchTerm && { search: searchTerm }),
+        ...(categoryFilter && { category: categoryFilter })
+      });
+
+      const response = await fetch(`/api/admin/destinations?${params}`);
       if (response.ok) {
         const data = await response.json();
-        // Đảm bảo destinations luôn là array
-        if (Array.isArray(data)) {
-          setDestinations(data);
-        } else if (data.destinations && Array.isArray(data.destinations)) {
-          setDestinations(data.destinations);
-        } else {
-          console.error('Invalid data structure:', data);
-          setError('Cấu trúc dữ liệu không hợp lệ');
-          setDestinations([]);
-        }
+        setDestinations(data.destinations || []);
+        setTotalPages(data.pagination.pages || 1);
+        setTotalRecords(data.pagination.total || 0);
       } else {
         console.error('Failed to fetch destinations:', response.statusText);
-        setError(`Lỗi khi tải dữ liệu: ${response.statusText}`);
         setDestinations([]);
       }
     } catch (error) {
       console.error('Failed to fetch destinations:', error);
-      setError('Không thể kết nối đến server');
-      // Fallback data
-      setDestinations([
-        {
-          id: 1,
-          city: 'Phú Quốc',
-          country: 'Việt Nam',
-          province: 'Kiên Giang',
-          description: 'Đảo ngọc Phú Quốc - thiên đường du lịch với những bãi biển đẹp nhất Việt Nam',
-          image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=800&h=600&fit=crop',
-          rating: 4.8,
-          reviewCount: 15420,
-          hotels: 156,
-          fromPrice: 1200000,
-          toPrice: 8000000,
-          bestTime: 'Tháng 11 - Tháng 4',
-          category: 'Biển đảo',
-          popularity: 'Rất cao',
-          slug: 'phu-quoc',
-          createdAt: '2024-01-15'
-        }
-      ]);
+      setDestinations([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa điểm đến này?')) {
+    if (confirm('Bạn có chắc chắn muốn xóa địa điểm này?')) {
       try {
         const response = await fetch(`/api/admin/destinations/${id}`, {
           method: 'DELETE'
         });
         if (response.ok) {
           setDestinations(destinations.filter(d => d.id !== id));
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to delete destination');
         }
       } catch (error) {
         console.error('Failed to delete destination:', error);
@@ -105,30 +113,22 @@ export default function DestinationsPage() {
     }
   };
 
-  const filteredDestinations = destinations.filter(destination =>
-    destination.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    destination.province.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    destination.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchDestinations();
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    setEditingDestination(null);
+    fetchDestinations();
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-red-600 text-lg font-medium">{error}</div>
-        <button
-          onClick={fetchDestinations}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-        >
-          Thử lại
-        </button>
       </div>
     );
   }
@@ -143,9 +143,9 @@ export default function DestinationsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-2xl font-bold text-gray-900"
           >
-            Quản lý Điểm đến
+            Quản lý Địa điểm Du lịch
           </MotionH2>
-          <p className="text-gray-600">Quản lý tất cả điểm đến du lịch trong hệ thống</p>
+          <p className="text-gray-600">Quản lý tất cả địa điểm du lịch trong hệ thống</p>
         </div>
         <MotionButton
           onClick={() => setShowModal(true)}
@@ -154,33 +154,42 @@ export default function DestinationsPage() {
           whileTap={{ scale: 0.95 }}
         >
           <PlusIcon className="h-5 w-5" />
-          <span>Thêm điểm đến</span>
+          <span>Thêm địa điểm</span>
         </MotionButton>
       </div>
 
       {/* Search and Filters */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex space-x-4">
+        <form onSubmit={handleSearch} className="flex space-x-4">
           <div className="flex-1">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Tìm kiếm điểm đến..."
+                placeholder="Tìm kiếm địa điểm..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </div>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+          <select 
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          >
             <option value="">Tất cả danh mục</option>
-            <option value="biển">Biển</option>
-            <option value="núi">Núi</option>
-            <option value="thành phố">Thành phố</option>
-            <option value="nông thôn">Nông thôn</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
           </select>
-        </div>
+          <button
+            type="submit"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+          >
+            Tìm kiếm
+          </button>
+        </form>
       </div>
 
       {/* Destinations Table */}
@@ -190,19 +199,16 @@ export default function DestinationsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Điểm đến
+                  Địa điểm
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Danh mục
+                  Thông tin
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Đánh giá
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Khách sạn
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Giá từ
+                  Thống kê
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Thao tác
@@ -210,57 +216,59 @@ export default function DestinationsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredDestinations.map((destination) => (
+              {destinations.map((destination) => (
                 <tr key={destination.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-12 w-12">
+                      <div className="flex-shrink-0 h-16 w-16">
                         <img
-                          className="h-12 w-12 rounded-lg object-cover"
+                          className="h-16 w-16 rounded-lg object-cover"
                           src={destination.image}
                           alt={destination.city}
                         />
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {destination.city}
+                          {destination.city}, {destination.province}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {destination.province}, {destination.country}
+                          {destination.country}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {destination.category}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {destination.category}
-                    </span>
+                    <div className="text-sm text-gray-900">
+                      <div>Giá từ: {destination.fromPrice.toLocaleString('vi-VN')}đ</div>
+                      <div>Thời điểm tốt: {destination.bestTime || 'N/A'}</div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
+                      <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
                       <span className="text-sm text-gray-900">{destination.rating}</span>
-                      <span className="text-yellow-400 ml-1">★</span>
                       <span className="text-sm text-gray-500 ml-1">
                         ({destination.reviewCount.toLocaleString()})
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {destination.hotels}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {destination.fromPrice.toLocaleString('vi-VN')} VNĐ
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      <div>Khách sạn: {destination._count?.hotels_relation}</div>
+                      <div>Hoạt động: {destination._count?.activities_relation}</div>
+                      <div>Tour: {destination._count?.packages_relation}</div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => setEditingDestination(destination)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <EyeIcon className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => setEditingDestination(destination)}
+                        onClick={() => {
+                          setEditingDestination(destination);
+                          setShowModal(true);
+                        }}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
                         <PencilIcon className="h-5 w-5" />
@@ -283,35 +291,70 @@ export default function DestinationsPage() {
       {/* Pagination */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="flex-1 flex justify-between sm:hidden">
-          <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          <button 
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
             Trước
           </button>
-          <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          <button 
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
             Sau
           </button>
         </div>
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-gray-700">
-              Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">10</span> trong tổng số{' '}
-              <span className="font-medium">{filteredDestinations.length}</span> kết quả
+              Hiển thị <span className="font-medium">{(currentPage - 1) * 10 + 1}</span> đến{' '}
+              <span className="font-medium">{Math.min(currentPage * 10, destinations.length)}</span> trong tổng số{' '}
+              <span className="font-medium">{destinations.length}</span> kết quả
             </p>
           </div>
           <div>
             <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              >
                 Trước
               </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </button>
-              <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                    currentPage === page
+                      ? 'z-10 bg-red-50 border-red-500 text-red-600'
+                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              >
                 Sau
               </button>
             </nav>
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <DestinationModal
+          destination={editingDestination}
+          onClose={handleModalClose}
+        />
+      )}
     </div>
   );
-} 
+}

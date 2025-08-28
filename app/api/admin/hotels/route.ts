@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
-
+// api/hotels/route.ts
 // GET - Lấy danh sách hotels
 export async function GET(request: NextRequest) {
   try {

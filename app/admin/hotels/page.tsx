@@ -9,7 +9,7 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 import { MotionDiv, MotionH2, MotionH3, MotionButton } from '../../components/common/MotionWrapper';
-
+// app/admin/hotels/page.tsx
 interface Hotel {
   id: number;
   name: string;

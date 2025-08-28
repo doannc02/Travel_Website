@@ -30,49 +30,31 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Kiểm tra authentication và role
     checkAuth();
   }, []);
-
+  
   const checkAuth = async () => {
     try {
-      // Kiểm tra session/token
-      const token = localStorage.getItem('admin_token');
-      if (!token) {
-        router.push('/auth/admin-login?redirect=/admin');
+      const res = await fetch("/api/auth/me", { credentials: "include" }); 
+      if (!res.ok) {
+        router.push("/auth/admin-login?redirect=/admin");
         return;
       }
-
-      // Verify token và kiểm tra role
-      const response = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ token })
-      });
-
-      if (!response.ok) {
-        localStorage.removeItem('admin_token');
-        router.push('/auth/admin-login?redirect=/admin');
+      const userData = await res.json();
+      console.log(userData, "===================userdaataa");
+      if (userData.user.role !== "admin") {
+        router.push("/auth/admin-login?message=unauthorized");
         return;
       }
-
-      const userData = await response.json();
-      if (userData.role !== 'admin') {
-        router.push('/auth/admin-login?message=unauthorized');
-        return;
-      }
-
-      setUser(userData);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      router.push('/auth/admin-login?redirect=/admin');
+      setUser(userData.user);
+    } catch (err) {
+      console.error(err);
+      router.push("/auth/admin-login?redirect=/admin");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');

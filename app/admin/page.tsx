@@ -13,7 +13,7 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { MotionDiv, MotionH2, MotionH3, MotionP } from '../components/common/MotionWrapper';
-
+// app/admin/page.tsx
 interface DashboardStats {
   destinations: number;
   hotels: number;

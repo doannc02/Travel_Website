@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../../components/common/MotionWrapper';
 import Link from 'next/link';
-
+// app/auth/register/page.tsx
 interface FormData {
   firstName: string;
   lastName: string;
@@ -102,14 +102,38 @@ export default function RegisterPage() {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     if (validateStep(currentStep)) {
-      // Handle form submission
-      console.log('Form submitted:', formData);
-      // In real app, send to API
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+          }),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          alert(data.error || "Đăng ký thất bại");
+          return;
+        }
+  
+        alert("Đăng ký thành công!");
+        window.location.href = "/auth/login"; // chuyển sang trang đăng nhập
+      } catch (err) {
+        console.error("Register error:", err);
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+      }
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12">
