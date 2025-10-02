@@ -1,22 +1,22 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  HomeIcon, 
-  MapPinIcon, 
-  BuildingOfficeIcon, 
-  PaperAirplaneIcon, 
-  CubeIcon, 
-  PuzzlePieceIcon, 
-  ShieldCheckIcon, 
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import {
+  HomeIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
+  PaperAirplaneIcon,
+  CubeIcon,
+  PuzzlePieceIcon,
+  ShieldCheckIcon,
   CalendarIcon,
   UsersIcon,
   ChartBarIcon,
   CogIcon,
-  ArrowLeftOnRectangleIcon
-} from '@heroicons/react/24/outline';
-import { MotionDiv, MotionButton } from '../components/common/MotionWrapper';
+  ArrowLeftOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+import { MotionDiv, MotionButton } from "../components/common/MotionWrapper";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -32,10 +32,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     checkAuth();
   }, []);
-  
+
   const checkAuth = async () => {
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" }); 
+      const res = await fetch("/api/auth/me", { credentials: "include" });
       if (!res.ok) {
         router.push("/auth/admin-login?redirect=/admin");
         return;
@@ -54,27 +54,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       setLoading(false);
     }
   };
-  
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token');
+    localStorage.removeItem("admin_token");
     // Clear cookie
-    document.cookie = 'admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/auth/admin-login');
+    document.cookie =
+      "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    router.push("/auth/admin-login");
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-    { name: 'Destinations', href: '/admin/destinations', icon: MapPinIcon },
-    { name: 'Hotels', href: '/admin/hotels', icon: BuildingOfficeIcon },
-    { name: 'Flights', href: '/admin/flights', icon: PaperAirplaneIcon },
-    { name: 'Packages', href: '/admin/packages', icon: CubeIcon },
-    { name: 'Activities', href: '/admin/activities', icon: PuzzlePieceIcon },
-    { name: 'Insurance', href: '/admin/insurance', icon: ShieldCheckIcon },
-    { name: 'Bookings', href: '/admin/bookings', icon: CalendarIcon },
-    { name: 'Users', href: '/admin/users', icon: UsersIcon },
-    { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
-    { name: 'Settings', href: '/admin/settings', icon: CogIcon },
+    { name: "Dashboard", href: "/admin", icon: HomeIcon },
+    { name: "Destinations", href: "/admin/destinations", icon: MapPinIcon },
+    { name: "Hotels", href: "/admin/hotels", icon: BuildingOfficeIcon },
+    { name: "Flights", href: "/admin/flights", icon: PaperAirplaneIcon },
+    { name: "Packages", href: "/admin/packages", icon: CubeIcon },
+    { name: "Activities", href: "/admin/activities", icon: PuzzlePieceIcon },
+    { name: "Insurance", href: "/admin/insurance", icon: ShieldCheckIcon },
+    { name: "Bookings", href: "/admin/bookings", icon: CalendarIcon },
+    { name: "Users", href: "/admin/users", icon: UsersIcon },
+    { name: "Analytics", href: "/admin/analytics", icon: ChartBarIcon },
+    { name: "Settings", href: "/admin/settings", icon: CogIcon },
   ];
 
   if (loading) {
@@ -88,15 +88,35 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+      <div
+        className={`fixed inset-0 z-50 lg:hidden ${
+          sidebarOpen ? "block" : "hidden"
+        }`}
+      >
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-75"
+          onClick={() => setSidebarOpen(false)}
+        />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <div className="flex h-16 items-center justify-between px-4">
             <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
-            <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-gray-600">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="text-gray-900 hover:text-gray-600"
+            >
               <span className="sr-only">Close sidebar</span>
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -107,8 +127,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 href={item.href}
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   pathname === item.href
-                    ? 'bg-red-100 text-red-900'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? "bg-red-100 text-red-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -133,8 +153,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 href={item.href}
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   pathname === item.href
-                    ? 'bg-red-100 text-red-900'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? "bg-red-100 text-red-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
                 <item.icon className="mr-3 h-6 w-6" />
@@ -146,19 +166,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">
-                    {user?.name?.charAt(0) || 'A'}
+                  <span className="text-gray-900 text-sm font-medium">
+                    {user?.name?.charAt(0) || "A"}
                   </span>
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700">{user?.name || 'Admin'}</p>
-                <p className="text-xs text-gray-500">{user?.email || 'admin@travel.com'}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.name || "Admin"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {user?.email || "admin@travel.com"}
+                </p>
               </div>
             </div>
             <MotionButton
               onClick={handleLogout}
-              className="mt-3 w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              className="mt-3 w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 rounded-md"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -175,12 +199,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button
             type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+            className="-m-2.5 p-2.5 text-gray-900 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
 
@@ -189,12 +223,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" />
               <div className="flex items-center gap-x-4">
-                <span className="text-sm text-gray-700">
-                  {new Date().toLocaleDateString('vi-VN', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                <span className="text-sm text-gray-900">
+                  {new Date().toLocaleDateString("vi-VN", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </span>
               </div>
@@ -211,4 +245,4 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
     </div>
   );
-} 
+}

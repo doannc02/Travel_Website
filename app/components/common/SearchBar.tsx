@@ -55,7 +55,7 @@ export default function SearchTabs() {
               type="date"
               className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
             />
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+            <button className="bg-blue-600 hover:bg-blue-700 text-gray-900 px-6 py-3 rounded-lg font-semibold">
               Tìm khách sạn
             </button>
           </motion.div>
@@ -84,7 +84,7 @@ export default function SearchTabs() {
               type="date"
               className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
             />
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+            <button className="bg-blue-600 hover:bg-blue-700 text-gray-900 px-6 py-3 rounded-lg font-semibold">
               Tìm chuyến bay
             </button>
           </motion.div>
@@ -112,7 +112,7 @@ export default function SearchTabs() {
               type="date"
               className="border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
             />
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+            <button className="bg-blue-600 hover:bg-blue-700 text-gray-900 px-6 py-3 rounded-lg font-semibold">
               Tìm Combo
             </button>
           </motion.div>

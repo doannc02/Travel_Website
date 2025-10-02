@@ -1,14 +1,19 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon, 
+"use client";
+import { useState, useEffect } from "react";
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
   EyeIcon,
   MagnifyingGlassIcon,
-  PaperAirplaneIcon
-} from '@heroicons/react/24/outline';
-import { MotionDiv, MotionH2, MotionH3, MotionButton } from '../../components/common/MotionWrapper';
+  PaperAirplaneIcon,
+} from "@heroicons/react/24/outline";
+import {
+  MotionDiv,
+  MotionH2,
+  MotionH3,
+  MotionButton,
+} from "../../components/common/MotionWrapper";
 
 interface Flight {
   id: number;
@@ -34,7 +39,7 @@ interface Flight {
 export default function FlightsPage() {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingFlight, setEditingFlight] = useState<Flight | null>(null);
 
@@ -44,16 +49,16 @@ export default function FlightsPage() {
 
   const fetchFlights = async () => {
     try {
-      const response = await fetch('/api/admin/flights');
+      const response = await fetch("/api/admin/flights");
       if (response.ok) {
         const data = await response.json();
         setFlights(data.flights || []);
       } else {
-        console.error('Failed to fetch flights:', response.statusText);
+        console.error("Failed to fetch flights:", response.statusText);
         setFlights([]);
       }
     } catch (error) {
-      console.error('Failed to fetch flights:', error);
+      console.error("Failed to fetch flights:", error);
       setFlights([]);
     } finally {
       setLoading(false);
@@ -61,25 +66,26 @@ export default function FlightsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa chuyến bay này?')) {
+    if (confirm("Bạn có chắc chắn muốn xóa chuyến bay này?")) {
       try {
         const response = await fetch(`/api/admin/flights/${id}`, {
-          method: 'DELETE'
+          method: "DELETE",
         });
         if (response.ok) {
-          setFlights(flights.filter(f => f.id !== id));
+          setFlights(flights.filter((f) => f.id !== id));
         }
       } catch (error) {
-        console.error('Failed to delete flight:', error);
+        console.error("Failed to delete flight:", error);
       }
     }
   };
 
-  const filteredFlights = flights.filter(flight =>
-    flight.airline.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    flight.flightNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    flight.departure.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    flight.arrival.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFlights = flights.filter(
+    (flight) =>
+      flight.airline.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      flight.flightNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      flight.departure.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      flight.arrival.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -102,11 +108,13 @@ export default function FlightsPage() {
           >
             Quản lý Chuyến bay
           </MotionH2>
-          <p className="text-gray-600">Quản lý tất cả chuyến bay trong hệ thống</p>
+          <p className="text-gray-600">
+            Quản lý tất cả chuyến bay trong hệ thống
+          </p>
         </div>
         <MotionButton
           onClick={() => setShowModal(true)}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          className="bg-red-600 hover:bg-red-700 text-gray-900 px-4 py-2 rounded-lg flex items-center space-x-2"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -120,7 +128,7 @@ export default function FlightsPage() {
         <div className="flex space-x-4">
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-900" />
               <input
                 type="text"
                 placeholder="Tìm kiếm chuyến bay..."
@@ -182,25 +190,33 @@ export default function FlightsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm">
-                      <div className="font-medium text-gray-900">{flight.departure}</div>
+                      <div className="font-medium text-gray-900">
+                        {flight.departure}
+                      </div>
                       <div className="text-gray-500">→</div>
-                      <div className="font-medium text-gray-900">{flight.arrival}</div>
+                      <div className="font-medium text-gray-900">
+                        {flight.arrival}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      <div>{flight.departureTime} - {flight.arrivalTime}</div>
+                      <div>
+                        {flight.departureTime} - {flight.arrivalTime}
+                      </div>
                       <div className="text-gray-500">{flight.duration}</div>
-                      <div className="text-xs text-blue-600">{flight.stops}</div>
+                      <div className="text-xs text-blue-600">
+                        {flight.stops}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       <span className="line-through text-gray-500 mr-2">
-                        {flight.originalPrice.toLocaleString('vi-VN')}đ
+                        {flight.originalPrice.toLocaleString("vi-VN")}đ
                       </span>
                       <span className="font-semibold text-red-600">
-                        {flight.price.toLocaleString('vi-VN')}đ
+                        {flight.price.toLocaleString("vi-VN")}đ
                       </span>
                     </div>
                     <div className="text-xs text-green-600 font-medium">
@@ -242,18 +258,20 @@ export default function FlightsPage() {
       {/* Pagination */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="flex-1 flex justify-between sm:hidden">
-          <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50">
             Trước
           </button>
-          <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50">
             Sau
           </button>
         </div>
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-gray-700">
-              Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">10</span> trong tổng số{' '}
-              <span className="font-medium">{filteredFlights.length}</span> kết quả
+            <p className="text-sm text-gray-900">
+              Hiển thị <span className="font-medium">1</span> đến{" "}
+              <span className="font-medium">10</span> trong tổng số{" "}
+              <span className="font-medium">{filteredFlights.length}</span> kết
+              quả
             </p>
           </div>
           <div>
@@ -261,7 +279,7 @@ export default function FlightsPage() {
               <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 Trước
               </button>
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-900 hover:bg-gray-50">
                 1
               </button>
               <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
@@ -273,4 +291,4 @@ export default function FlightsPage() {
       </div>
     </div>
   );
-} 
+}

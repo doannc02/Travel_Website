@@ -31,15 +31,29 @@ export default function TravelokaBanner() {
   const [guests, setGuests] = useState("2 Adult(s), 0 Child, 1 Room");
   const [destination, setDestination] = useState("");
   const [showGuestPicker, setShowGuestPicker] = useState(false);
-  const [guestCount, setGuestCount] = useState({ adults: 2, children: 0, rooms: 1 });
+  const [guestCount, setGuestCount] = useState({
+    adults: 2,
+    children: 0,
+    rooms: 1,
+  });
 
   const mainTabs = [
     { id: "Hotels", label: "Hotels", icon: Hotel, path: "/hotels" },
     { id: "Flights", label: "Flights", icon: Plane, path: "/flights" },
     { id: "Bus & Shuttle", label: "Bus & Shuttle", icon: Bus, path: "/bus" },
-    { id: "Airport Transfer", label: "Airport Transfer", icon: Car, path: "/transfer" },
+    {
+      id: "Airport Transfer",
+      label: "Airport Transfer",
+      icon: Car,
+      path: "/transfer",
+    },
     { id: "Car Rental", label: "Car Rental", icon: Car, path: "/car-rental" },
-    { id: "Things to Do", label: "Things to Do", icon: Mountain, path: "/activities" },
+    {
+      id: "Things to Do",
+      label: "Things to Do",
+      icon: Mountain,
+      path: "/activities",
+    },
     { id: "More", label: "More", icon: Grid3X3, path: "/packages" },
   ];
 
@@ -56,33 +70,38 @@ export default function TravelokaBanner() {
     }
 
     // Navigate based on active tab
-    const activeTab = mainTabs.find(tab => tab.id === activeMainTab);
+    const activeTab = mainTabs.find((tab) => tab.id === activeMainTab);
     if (activeTab) {
       const searchParams = new URLSearchParams({
         destination: destination,
         checkIn: checkInDate,
         checkOut: checkOutDate,
-        guests: `${guestCount.adults} Adult(s), ${guestCount.children} Child, ${guestCount.rooms} Room`
+        guests: `${guestCount.adults} Adult(s), ${guestCount.children} Child, ${guestCount.rooms} Room`,
       });
-      
+
       router.push(`${activeTab.path}?${searchParams.toString()}`);
     }
   };
 
   const updateGuestString = () => {
-    setGuests(`${guestCount.adults} Adult(s), ${guestCount.children} Child, ${guestCount.rooms} Room`);
+    setGuests(
+      `${guestCount.adults} Adult(s), ${guestCount.children} Child, ${guestCount.rooms} Room`
+    );
   };
 
   useEffect(() => {
     updateGuestString();
   }, [guestCount]);
 
-  const handleGuestChange = (type: 'adults' | 'children' | 'rooms', action: 'increase' | 'decrease') => {
-    setGuestCount(prev => {
+  const handleGuestChange = (
+    type: "adults" | "children" | "rooms",
+    action: "increase" | "decrease"
+  ) => {
+    setGuestCount((prev) => {
       const newCount = { ...prev };
-      if (action === 'increase') {
+      if (action === "increase") {
         newCount[type]++;
-      } else if (action === 'decrease' && newCount[type] > 0) {
+      } else if (action === "decrease" && newCount[type] > 0) {
         newCount[type]--;
       }
       return newCount;
@@ -107,7 +126,7 @@ export default function TravelokaBanner() {
               <button
                 key={tab.id}
                 onClick={() => setActiveMainTab(tab.id)}
-                className="text-white hover:text-blue-200 font-medium text-sm transition-colors"
+                className="text-gray-900 hover:text-blue-200 font-medium text-sm transition-colors"
               >
                 {tab.label}
               </button>
@@ -130,7 +149,7 @@ export default function TravelokaBanner() {
                   className={`flex items-center space-x-2 px-6 py-3 rounded-full transition-all ${
                     activeMainTab === tab.id
                       ? "bg-white text-gray-800 shadow-lg"
-                      : "text-white hover:bg-white/20"
+                      : "text-gray-900 hover:bg-white/20"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -153,7 +172,7 @@ export default function TravelokaBanner() {
                     onClick={() => setActiveSubTab(tab.id)}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
                       activeSubTab === tab.id
-                        ? "bg-blue-500 text-white"
+                        ? "bg-blue-500 text-gray-900"
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
@@ -172,17 +191,17 @@ export default function TravelokaBanner() {
             {/* Form Labels */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   City, destination, or hotel name
                 </label>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Check-in & Check-out Dates
                 </label>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Guests and Rooms
                 </label>
               </div>
@@ -192,7 +211,7 @@ export default function TravelokaBanner() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Destination Input */}
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-900" />
                 <input
                   type="text"
                   placeholder="City, hotel, place to go"
@@ -204,7 +223,7 @@ export default function TravelokaBanner() {
 
               {/* Date Inputs */}
               <div className="relative">
-                <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-900" />
                 <input
                   type="text"
                   value={`${checkInDate} - ${checkOutDate}`}
@@ -216,7 +235,7 @@ export default function TravelokaBanner() {
               {/* Guests Input */}
               <div className="relative flex">
                 <div className="relative flex-1">
-                  <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-900" />
                   <input
                     type="text"
                     value={guests}
@@ -224,7 +243,7 @@ export default function TravelokaBanner() {
                     onClick={() => setShowGuestPicker(!showGuestPicker)}
                     className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                   />
-                  
+
                   {/* Guest Picker Dropdown */}
                   {showGuestPicker && (
                     <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10 mt-1 p-4">
@@ -233,14 +252,20 @@ export default function TravelokaBanner() {
                           <span>Adults</span>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleGuestChange('adults', 'decrease')}
+                              onClick={() =>
+                                handleGuestChange("adults", "decrease")
+                              }
                               className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-8 text-center">{guestCount.adults}</span>
+                            <span className="w-8 text-center">
+                              {guestCount.adults}
+                            </span>
                             <button
-                              onClick={() => handleGuestChange('adults', 'increase')}
+                              onClick={() =>
+                                handleGuestChange("adults", "increase")
+                              }
                               className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                             >
                               <Plus className="w-4 h-4" />
@@ -251,14 +276,20 @@ export default function TravelokaBanner() {
                           <span>Children</span>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleGuestChange('children', 'decrease')}
+                              onClick={() =>
+                                handleGuestChange("children", "decrease")
+                              }
                               className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-8 text-center">{guestCount.children}</span>
+                            <span className="w-8 text-center">
+                              {guestCount.children}
+                            </span>
                             <button
-                              onClick={() => handleGuestChange('children', 'increase')}
+                              onClick={() =>
+                                handleGuestChange("children", "increase")
+                              }
                               className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                             >
                               <Plus className="w-4 h-4" />
@@ -269,14 +300,20 @@ export default function TravelokaBanner() {
                           <span>Rooms</span>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleGuestChange('rooms', 'decrease')}
+                              onClick={() =>
+                                handleGuestChange("rooms", "decrease")
+                              }
                               className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-8 text-center">{guestCount.rooms}</span>
+                            <span className="w-8 text-center">
+                              {guestCount.rooms}
+                            </span>
                             <button
-                              onClick={() => handleGuestChange('rooms', 'increase')}
+                              onClick={() =>
+                                handleGuestChange("rooms", "increase")
+                              }
                               className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                             >
                               <Plus className="w-4 h-4" />
@@ -288,7 +325,7 @@ export default function TravelokaBanner() {
                   )}
                 </div>
                 <button
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-r-lg font-semibold transition-colors flex items-center space-x-2"
+                  className="bg-orange-500 hover:bg-orange-600 text-gray-900 px-8 py-4 rounded-r-lg font-semibold transition-colors flex items-center space-x-2"
                   onClick={handleSearch}
                 >
                   <Search className="w-5 h-5" />
@@ -302,19 +339,19 @@ export default function TravelokaBanner() {
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
               <span>Trusted by</span>
               <div className="flex items-center space-x-4 ml-4">
-                <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                <div className="bg-red-600 text-gray-900 px-2 py-1 rounded text-xs font-bold">
                   MILLENNIUM
                 </div>
-                <div className="bg-gray-800 text-white px-2 py-1 rounded text-xs font-bold">
+                <div className="bg-gray-800 text-gray-900 px-2 py-1 rounded text-xs font-bold">
                   ALL
                 </div>
-                <div className="bg-blue-800 text-white px-2 py-1 rounded text-xs font-bold">
+                <div className="bg-blue-800 text-gray-900 px-2 py-1 rounded text-xs font-bold">
                   ARCHIPELAGO
                 </div>
-                <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">
+                <div className="bg-blue-600 text-gray-900 px-2 py-1 rounded text-xs font-bold">
                   Best Western
                 </div>
-                <div className="bg-green-700 text-white px-2 py-1 rounded text-xs font-bold">
+                <div className="bg-green-700 text-gray-900 px-2 py-1 rounded text-xs font-bold">
                   IHG
                 </div>
               </div>

@@ -1,18 +1,23 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { 
-  MapPinIcon, 
-  BuildingOfficeIcon, 
-  PaperAirplaneIcon, 
-  CubeIcon, 
-  PuzzlePieceIcon, 
-  ShieldCheckIcon, 
+"use client";
+import { useState, useEffect } from "react";
+import {
+  MapPinIcon,
+  BuildingOfficeIcon,
+  PaperAirplaneIcon,
+  CubeIcon,
+  PuzzlePieceIcon,
+  ShieldCheckIcon,
   CalendarIcon,
   UsersIcon,
   CurrencyDollarIcon,
-  ChartBarIcon
-} from '@heroicons/react/24/outline';
-import { MotionDiv, MotionH2, MotionH3, MotionP } from '../components/common/MotionWrapper';
+  ChartBarIcon,
+} from "@heroicons/react/24/outline";
+import {
+  MotionDiv,
+  MotionH2,
+  MotionH3,
+  MotionP,
+} from "../components/common/MotionWrapper";
 // app/admin/page.tsx
 interface DashboardStats {
   destinations: number;
@@ -38,7 +43,7 @@ export default function AdminDashboard() {
     bookings: 0,
     users: 0,
     revenue: 0,
-    growth: 0
+    growth: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -48,13 +53,13 @@ export default function AdminDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('/api/admin/dashboard/stats');
+      const response = await fetch("/api/admin/dashboard/stats");
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error);
+      console.error("Failed to fetch dashboard stats:", error);
       // Fallback data
       setStats({
         destinations: 12,
@@ -66,7 +71,7 @@ export default function AdminDashboard() {
         bookings: 234,
         users: 1234,
         revenue: 45678900,
-        growth: 15.6
+        growth: 15.6,
       });
     } finally {
       setLoading(false);
@@ -75,69 +80,69 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      name: 'Destinations',
+      name: "Destinations",
       value: stats.destinations,
       icon: MapPinIcon,
-      color: 'bg-blue-500',
-      change: '+12%',
-      changeType: 'positive'
+      color: "bg-blue-500",
+      change: "+12%",
+      changeType: "positive",
     },
     {
-      name: 'Hotels',
+      name: "Hotels",
       value: stats.hotels,
       icon: BuildingOfficeIcon,
-      color: 'bg-green-500',
-      change: '+8%',
-      changeType: 'positive'
+      color: "bg-green-500",
+      change: "+8%",
+      changeType: "positive",
     },
     {
-      name: 'Flights',
+      name: "Flights",
       value: stats.flights,
       icon: PaperAirplaneIcon,
-      color: 'bg-purple-500',
-      change: '+15%',
-      changeType: 'positive'
+      color: "bg-purple-500",
+      change: "+15%",
+      changeType: "positive",
     },
     {
-      name: 'Packages',
+      name: "Packages",
       value: stats.packages,
       icon: CubeIcon,
-      color: 'bg-yellow-500',
-      change: '+5%',
-      changeType: 'positive'
+      color: "bg-yellow-500",
+      change: "+5%",
+      changeType: "positive",
     },
     {
-      name: 'Activities',
+      name: "Activities",
       value: stats.activities,
       icon: PuzzlePieceIcon,
-      color: 'bg-pink-500',
-      change: '+20%',
-      changeType: 'positive'
+      color: "bg-pink-500",
+      change: "+20%",
+      changeType: "positive",
     },
     {
-      name: 'Insurance',
+      name: "Insurance",
       value: stats.insurance,
       icon: ShieldCheckIcon,
-      color: 'bg-indigo-500',
-      change: '+3%',
-      changeType: 'positive'
+      color: "bg-indigo-500",
+      change: "+3%",
+      changeType: "positive",
     },
     {
-      name: 'Bookings',
+      name: "Bookings",
       value: stats.bookings,
       icon: CalendarIcon,
-      color: 'bg-red-500',
-      change: '+25%',
-      changeType: 'positive'
+      color: "bg-red-500",
+      change: "+25%",
+      changeType: "positive",
     },
     {
-      name: 'Users',
+      name: "Users",
       value: stats.users,
       icon: UsersIcon,
-      color: 'bg-teal-500',
-      change: '+18%',
-      changeType: 'positive'
-    }
+      color: "bg-teal-500",
+      change: "+18%",
+      changeType: "positive",
+    },
   ];
 
   if (loading) {
@@ -183,7 +188,7 @@ export default function AdminDashboard() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className={`${stat.color} rounded-md p-3`}>
-                    <stat.icon className="h-6 w-6 text-white" />
+                    <stat.icon className="h-6 w-6 text-gray-900" />
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
@@ -200,9 +205,13 @@ export default function AdminDashboard() {
             </div>
             <div className="bg-gray-50 px-5 py-3">
               <div className="text-sm">
-                <span className={`font-medium ${
-                  stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <span
+                  className={`font-medium ${
+                    stat.changeType === "positive"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
                   {stat.change}
                 </span>
                 <span className="text-gray-500"> so với tháng trước</span>
@@ -230,7 +239,7 @@ export default function AdminDashboard() {
                   Doanh thu tháng này
                 </dt>
                 <dd className="text-2xl font-bold text-gray-900">
-                  {stats.revenue.toLocaleString('vi-VN')} VNĐ
+                  {stats.revenue.toLocaleString("vi-VN")} VNĐ
                 </dd>
               </dl>
             </div>
@@ -285,9 +294,7 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-900">
                   Thêm điểm đến mới: Đà Lạt
                 </p>
-                <p className="text-sm text-gray-500">
-                  2 giờ trước
-                </p>
+                <p className="text-sm text-gray-500">2 giờ trước</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -300,9 +307,7 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-900">
                   Cập nhật thông tin khách sạn InterContinental
                 </p>
-                <p className="text-sm text-gray-500">
-                  4 giờ trước
-                </p>
+                <p className="text-sm text-gray-500">4 giờ trước</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -315,9 +320,7 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-gray-900">
                   Thêm chuyến bay mới: Hà Nội - Phú Quốc
                 </p>
-                <p className="text-sm text-gray-500">
-                  6 giờ trước
-                </p>
+                <p className="text-sm text-gray-500">6 giờ trước</p>
               </div>
             </div>
           </div>
@@ -325,4 +328,4 @@ export default function AdminDashboard() {
       </MotionDiv>
     </div>
   );
-} 
+}

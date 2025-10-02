@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FaArrowUp } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { FaArrowUp } from "react-icons/fa";
 
 export default function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -14,20 +14,22 @@ export default function BackToTop() {
       }
     };
 
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
   return (
     <motion.button
-      className={`fixed bottom-6 right-6 bg-red-600 text-white p-3 rounded-full shadow-lg z-50 ${!isVisible && 'hidden'}`}
+      className={`fixed bottom-6 right-6 bg-red-600 text-gray-900 p-3 rounded-full shadow-lg z-50 ${
+        !isVisible && "hidden"
+      }`}
       onClick={scrollToTop}
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}

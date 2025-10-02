@@ -1,20 +1,20 @@
-"use client"
-import Header from '../common/Header';
-import Footer from '../common/Footer';
-import SearchBar from '../common/SearchBar';
-import Promotions from '../home/Promotion';
-import Destinations from '../home/DestinationSection';
+"use client";
+import Header from "../common/Header";
+import Footer from "../common/Footer";
+import SearchBar from "../common/SearchBar";
+import Promotions from "../home/Promotion";
+import Destinations from "../home/DestinationSection";
 
 export default function HeaderFooterDemo() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header />
-      
+
       {/* Main Content with spacing for fixed header */}
       <main className="pt-20 lg:pt-24">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-red-500 to-red-600 text-white py-20">
+        <div className="bg-gradient-to-r from-red-500 to-red-600 text-gray-900 py-20">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
               Khám phá thế giới cùng Traveloka
@@ -43,19 +43,25 @@ export default function HeaderFooterDemo() {
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="text-4xl mb-4">🏨</div>
               <h3 className="text-xl font-bold mb-2">Khách sạn chất lượng</h3>
-              <p className="text-gray-600">Hơn 1 triệu khách sạn trên toàn thế giới với giá tốt nhất</p>
+              <p className="text-gray-600">
+                Hơn 1 triệu khách sạn trên toàn thế giới với giá tốt nhất
+              </p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="text-4xl mb-4">✈️</div>
               <h3 className="text-xl font-bold mb-2">Vé máy bay giá rẻ</h3>
-              <p className="text-gray-600">So sánh giá từ hơn 600 hãng bay và đặt vé với giá tốt nhất</p>
+              <p className="text-gray-600">
+                So sánh giá từ hơn 600 hãng bay và đặt vé với giá tốt nhất
+              </p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="text-4xl mb-4">🎒</div>
               <h3 className="text-xl font-bold mb-2">Gói du lịch trọn gói</h3>
-              <p className="text-gray-600">Khám phá các điểm đến mới với gói du lịch tiết kiệm</p>
+              <p className="text-gray-600">
+                Khám phá các điểm đến mới với gói du lịch tiết kiệm
+              </p>
             </div>
           </div>
         </div>
@@ -89,4 +95,4 @@ export default function HeaderFooterDemo() {
       <Footer />
     </div>
   );
-} 
+}

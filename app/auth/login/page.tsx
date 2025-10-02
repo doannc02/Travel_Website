@@ -1,7 +1,13 @@
-"use client"
-import { useState } from 'react';
-import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../../components/common/MotionWrapper';
-import Link from 'next/link';
+"use client";
+import { useState } from "react";
+import {
+  MotionDiv,
+  MotionH2,
+  MotionH3,
+  MotionP,
+  MotionButton,
+} from "../../components/common/MotionWrapper";
+import Link from "next/link";
 // app/auth/login/page.tsx
 // Type definitions
 interface FormData {
@@ -17,34 +23,37 @@ interface Errors {
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<FormData>({
-    email: '',
-    password: '',
-    rememberMe: false
+    email: "",
+    password: "",
+    rememberMe: false,
   });
 
   const [errors, setErrors] = useState<Errors>({});
 
-  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof FormData,
+    value: string | boolean
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof Errors]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors: Errors = {};
-  
+
     if (!formData.email.trim()) newErrors.email = "Vui lòng nhập email";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Email không hợp lệ";
-  
+
     if (!formData.password) newErrors.password = "Vui lòng nhập mật khẩu";
     else if (formData.password.length < 6)
       newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-  
+
     setErrors(newErrors);
-  
+
     if (Object.keys(newErrors).length === 0) {
       try {
         const res = await fetch("/api/auth/login", {
@@ -55,19 +64,19 @@ export default function LoginPage() {
             password: formData.password,
           }),
         });
-  
+
         const data = await res.json();
-  
+
         if (!res.ok) {
           alert(data.error || "Đăng nhập thất bại");
           return;
         }
-  
+
         // ✅ Lưu token vào localStorage (nếu cần rememberMe)
         if (formData.rememberMe) {
           localStorage.setItem("token", data.token);
         }
-  
+
         alert("Đăng nhập thành công!");
         window.location.href = "/"; // chuyển về trang chủ
       } catch (err) {
@@ -76,7 +85,6 @@ export default function LoginPage() {
       }
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12">
@@ -110,69 +118,86 @@ export default function LoginPage() {
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-900 mb-2"
+                >
                   Email
                 </label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   id="email"
                   name="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
+                    errors.email ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="example@email.com"
                   autoComplete="email"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-sm mt-1" role="alert">{errors.email}</p>
+                  <p className="text-red-500 text-sm mt-1" role="alert">
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-900 mb-2"
+                >
                   Mật khẩu
                 </label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   id="password"
                   name="password"
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
+                    errors.password ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="Nhập mật khẩu"
                   autoComplete="current-password"
                 />
                 {errors.password && (
-                  <p className="text-red-500 text-sm mt-1" role="alert">{errors.password}</p>
+                  <p className="text-red-500 text-sm mt-1" role="alert">
+                    {errors.password}
+                  </p>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="rememberMe"
                     name="rememberMe"
                     checked={formData.rememberMe}
-                    onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
+                    onChange={(e) =>
+                      handleInputChange("rememberMe", e.target.checked)
+                    }
                     className="mr-2 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                   />
                   <label htmlFor="rememberMe" className="text-sm text-gray-600">
                     Ghi nhớ đăng nhập
                   </label>
                 </div>
-                <Link href="/auth/forgot-password" className="text-sm text-red-600 hover:text-red-700 transition-colors">
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm text-red-600 hover:text-red-700 transition-colors"
+                >
                   Quên mật khẩu?
                 </Link>
               </div>
 
               <MotionButton
                 type="submit"
-                className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 text-gray-900 py-3 px-6 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -181,8 +206,11 @@ export default function LoginPage() {
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  Chưa có tài khoản?{' '}
-                  <Link href="/auth/register" className="text-red-600 hover:text-red-700 font-medium transition-colors">
+                  Chưa có tài khoản?{" "}
+                  <Link
+                    href="/auth/register"
+                    className="text-red-600 hover:text-red-700 font-medium transition-colors"
+                  >
                     Đăng ký ngay
                   </Link>
                 </p>
@@ -196,26 +224,28 @@ export default function LoginPage() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Hoặc đăng nhập với</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Hoặc đăng nhập với
+                  </span>
                 </div>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <MotionButton
                   type="button"
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-blue-600 text-gray-900 py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => console.log('Facebook login')}
+                  onClick={() => console.log("Facebook login")}
                 >
                   <span>Facebook</span>
                 </MotionButton>
                 <MotionButton
                   type="button"
-                  className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-red-600 text-gray-900 py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => console.log('Google login')}
+                  onClick={() => console.log("Google login")}
                 >
                   <span>Google</span>
                 </MotionButton>

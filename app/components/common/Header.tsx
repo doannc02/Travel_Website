@@ -40,10 +40,10 @@ export default function Header() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-useEffect(() => {
-  const token = localStorage.getItem("token"); // hoặc "user"
-  setIsLoggedIn(!!token);
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // hoặc "user"
+    setIsLoggedIn(!!token);
+  }, []);
 
   const pathname = usePathname();
 
@@ -96,9 +96,9 @@ useEffect(() => {
                   href={item.url}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 group
                 ${
-                pathname === item.url
-                  ? "bg-red-600 text-white shadow-md"
-                  : "hover:bg-red-50 hover:text-red-600"
+                  pathname === item.url
+                    ? "bg-red-600 text-gray-900 shadow-md"
+                    : "hover:bg-red-50 hover:text-red-600"
                 }`}
                 >
                   <span className="text-lg">{item.icon}</span>
@@ -166,7 +166,7 @@ useEffect(() => {
             <div className="relative">
               <MotionButton
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-gray-900 rounded-lg hover:bg-red-700 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

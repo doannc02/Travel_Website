@@ -38,7 +38,10 @@ export default function Promotions() {
   };
 
   const [activeTab, setActiveTab] = useState("all");
-  const [packages, setPackages] = useState<{ data: TourPackage[]; total?: number }>({ data: [] });
+  const [packages, setPackages] = useState<{
+    data: TourPackage[];
+    total?: number;
+  }>({ data: [] });
   const [loading, setLoading] = useState<boolean>(true);
 
   async function fetchPromotions() {
@@ -46,10 +49,10 @@ export default function Promotions() {
     try {
       const params = new URLSearchParams();
       // Map tab -> category
-      if (activeTab === 'combo') params.append('category', 'Combo');
+      if (activeTab === "combo") params.append("category", "Combo");
       // Other tabs currently not backed by API; they will show empty state
-      params.append('limit', '6');
-      params.append('page', '1');
+      params.append("limit", "6");
+      params.append("page", "1");
       const res = await fetch(`/api/packages?${params.toString()}`);
       const data = await res.json();
       if (data.success) {
@@ -121,7 +124,10 @@ export default function Promotions() {
         {loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <div
+                key={i}
+                className="animate-pulse bg-white rounded-2xl border border-gray-100 overflow-hidden"
+              >
                 <div className="h-48 bg-gray-200" />
                 <div className="p-6 space-y-3">
                   <div className="h-5 bg-gray-200 rounded w-3/4" />
@@ -157,11 +163,11 @@ export default function Promotions() {
                     }}
                   />
                   {promo.badge && (
-                    <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    <div className="absolute top-4 left-4 bg-blue-600 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
                       {promo.badge}
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  <div className="absolute top-4 right-4 bg-red-600 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
                     {promo.discount}
                   </div>
                 </div>
@@ -176,20 +182,22 @@ export default function Promotions() {
                     <span className="text-2xl font-bold text-red-600">
                       {formatCurrency(promo.price)}
                     </span>
-                    <span className="text-gray-400 line-through">
+                    <span className="text-gray-900 line-through">
                       {formatCurrency(promo.originalPrice)}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {promo.highlights.slice(0, 3).map((feature : any, idx: number) => (
-                      <span
-                        key={idx}
-                        className="bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-xs"
-                      >
-                        {feature}
-                      </span>
-                    ))}
+                    {promo.highlights
+                      .slice(0, 3)
+                      .map((feature: any, idx: number) => (
+                        <span
+                          key={idx}
+                          className="bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-xs"
+                        >
+                          {feature}
+                        </span>
+                      ))}
                   </div>
 
                   <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
@@ -203,7 +211,7 @@ export default function Promotions() {
                   </div>
 
                   <Link href={`/tour/${promo.id}`}>
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-gray-900 py-3 px-6 rounded-lg font-semibold transition-colors">
                       Xem chi tiết
                     </button>
                   </Link>
@@ -222,7 +230,7 @@ export default function Promotions() {
 
         <div className="mt-12 text-center">
           <Link href="/packages">
-            <button className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-colors">
+            <button className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-gray-900 transition-colors">
               Xem tất cả gói du lịch ({packages.total ?? 0})
             </button>
           </Link>

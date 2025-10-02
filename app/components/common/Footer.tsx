@@ -166,7 +166,7 @@ export default function ModernFooter() {
   };
 
   return (
-    <footer className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white relative overflow-hidden">
+    <footer className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-gray-900 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-64 h-64 bg-blue-400 rounded-full filter blur-3xl"></div>
@@ -184,7 +184,7 @@ export default function ModernFooter() {
                   <div key={index} className="group">
                     <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 transform hover:scale-105">
                       <Icon className="w-8 h-8 mx-auto mb-4 text-blue-400 group-hover:text-blue-300 transition-colors" />
-                      <div className="text-3xl font-bold text-white mb-2">
+                      <div className="text-3xl font-bold text-gray-900 mb-2">
                         {stat.value}
                       </div>
                       <div className="text-gray-300 text-sm">{stat.label}</div>
@@ -198,7 +198,7 @@ export default function ModernFooter() {
         {/* Mini Map Section */}
         <div className="border-t border-white/10">
           <div className="container mx-auto px-4 py-12">
-            <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+            <h4 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-blue-400" />
               Bản đồ Thanh Hoá
             </h4>
@@ -241,7 +241,7 @@ export default function ModernFooter() {
                   <Phone className="w-5 h-5 text-green-400" />
                   <a
                     href={`tel:${footerData.company.phone}`}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-gray-300 hover:text-gray-900 transition-colors"
                   >
                     {footerData.company.phone}
                   </a>
@@ -250,14 +250,14 @@ export default function ModernFooter() {
                   <Mail className="w-5 h-5 text-red-400" />
                   <a
                     href={`mailto:${footerData.company.email}`}
-                    className="text-gray-300 hover:text-white transition-colors"
+                    className="text-gray-300 hover:text-gray-900 transition-colors"
                   >
                     {footerData.company.email}
                   </a>
                 </div>
               </div>
 
-              <div className="text-xs text-gray-400 space-y-1">
+              <div className="text-xs text-gray-900 space-y-1">
                 <p>{footerData.company.taxCode}</p>
                 <p className="leading-relaxed">{footerData.company.license}</p>
               </div>
@@ -270,7 +270,7 @@ export default function ModernFooter() {
                 <div key={index}>
                   <div className="flex items-center gap-2 mb-6">
                     <SectionIcon className="w-5 h-5 text-blue-400" />
-                    <h4 className="text-lg font-semibold text-white">
+                    <h4 className="text-lg font-semibold text-gray-900">
                       {section.title}
                     </h4>
                   </div>
@@ -281,7 +281,7 @@ export default function ModernFooter() {
                         <li key={itemIndex}>
                           <a
                             href={item.url}
-                            className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-300 group"
+                            className="flex items-center gap-2 text-gray-300 hover:text-gray-900 transition-all duration-300 group"
                           >
                             <ItemIcon className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
                             <span className="group-hover:translate-x-1 transition-transform">
@@ -300,7 +300,7 @@ export default function ModernFooter() {
             <div>
               <div className="flex items-center gap-2 mb-6">
                 <Smartphone className="w-5 h-5 text-blue-400" />
-                <h4 className="text-lg font-semibold text-white">
+                <h4 className="text-lg font-semibold text-gray-900">
                   Tải ứng dụng
                 </h4>
               </div>
@@ -315,14 +315,14 @@ export default function ModernFooter() {
                   >
                     <div className="text-2xl">{app.logo}</div>
                     <div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-900">
                         {app.subtitle}
                       </div>
-                      <div className="text-white font-medium group-hover:text-blue-400 transition-colors">
+                      <div className="text-gray-900 font-medium group-hover:text-blue-400 transition-colors">
                         {app.name}
                       </div>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-white ml-auto" />
+                    <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-gray-900 ml-auto" />
                   </a>
                 ))}
               </div>
@@ -336,7 +336,7 @@ export default function ModernFooter() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {/* Social Media */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                <h4 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <Heart className="w-5 h-5 text-red-400" />
                   Kết nối với chúng tôi
                 </h4>
@@ -360,7 +360,7 @@ export default function ModernFooter() {
 
               {/* Payment Methods */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                <h4 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-green-400" />
                   Phương thức thanh toán
                 </h4>
@@ -368,7 +368,7 @@ export default function ModernFooter() {
                   {footerData.paymentMethods.map((method, index) => (
                     <div
                       key={index}
-                      className={`${method.color} text-white text-xs font-bold px-3 py-2 rounded-md text-center hover:scale-105 transition-transform`}
+                      className={`${method.color} text-gray-900 text-xs font-bold px-3 py-2 rounded-md text-center hover:scale-105 transition-transform`}
                     >
                       {method.text}
                     </div>
@@ -378,7 +378,7 @@ export default function ModernFooter() {
 
               {/* Awards */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                <h4 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                   <Award className="w-5 h-5 text-yellow-400" />
                   Giải thưởng
                 </h4>
@@ -407,29 +407,32 @@ export default function ModernFooter() {
         <div className="bg-black/20 border-t border-white/10">
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-gray-400 text-sm text-center md:text-left">
+              <div className="text-gray-900 text-sm text-center md:text-left">
                 © {new Date().getFullYear()} Traveloka Vietnam. Bảo lưu mọi
                 quyền.
               </div>
-              <div className="flex items-center gap-6 text-sm text-gray-400">
-                <a href="/terms" className="hover:text-white transition-colors">
+              <div className="flex items-center gap-6 text-sm text-gray-900">
+                <a
+                  href="/terms"
+                  className="hover:text-gray-900 transition-colors"
+                >
                   Điều khoản
                 </a>
                 <a
                   href="/privacy"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-gray-900 transition-colors"
                 >
                   Bảo mật
                 </a>
                 <a
                   href="/cookies"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-gray-900 transition-colors"
                 >
                   Cookie
                 </a>
                 <a
                   href="/sitemap"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-gray-900 transition-colors"
                 >
                   Sitemap
                 </a>

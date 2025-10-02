@@ -75,9 +75,7 @@ export default function DestinationModal({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (destination) {
-      setFormData(destination);
-    }
+    if (destination) setFormData(destination);
   }, [destination]);
 
   const handleChange = (
@@ -86,10 +84,7 @@ export default function DestinationModal({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,19 +99,15 @@ export default function DestinationModal({
     e.preventDefault();
     setLoading(true);
     setError("");
-
     try {
       const url = destination?.id
         ? `/api/admin/destinations/${destination.id}`
         : "/api/admin/destinations";
-
       const method = destination?.id ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
@@ -126,7 +117,7 @@ export default function DestinationModal({
         const errorData = await response.json();
         setError(errorData.error || "Có lỗi xảy ra");
       }
-    } catch (err) {
+    } catch {
       setError("Có lỗi xảy ra khi kết nối đến server");
     } finally {
       setLoading(false);
@@ -134,16 +125,16 @@ export default function DestinationModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-xl bg-white">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+      <div className="relative w-11/12 md:w-3/4 lg:w-2/3 bg-white rounded-2xl shadow-xl animate-fade-in">
         {/* Header */}
-        <div className="flex justify-between items-center pb-3 border-b">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {destination ? "Chỉnh sửa địa điểm" : "Thêm địa điểm mới"}
+        <div className="flex justify-between items-center p-5 border-b">
+          <h3 className="text-2xl font-semibold text-gray-900">
+            {destination ? "✏️ Chỉnh sửa địa điểm" : "➕ Thêm địa điểm mới"}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -151,7 +142,7 @@ export default function DestinationModal({
 
         {/* Error */}
         {error && (
-          <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div className="m-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
@@ -159,337 +150,217 @@ export default function DestinationModal({
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2"
+          className="p-6 space-y-6 max-h-[70vh] overflow-y-auto"
         >
-          {/* City + Province */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Thành phố *
-              </label>
-              <input
-                type="text"
+          {/* Group 1: Thông tin chính */}
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-semibold text-gray-800">
+              🏙️ Thông tin địa điểm
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Thành phố *"
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tỉnh/Thành *
-              </label>
-              <input
-                type="text"
+              <Input
+                label="Tỉnh/Thành *"
                 name="province"
                 value={formData.province}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
             </div>
-          </div>
-
-          {/* Country */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Quốc gia
-            </label>
-            <input
-              type="text"
+            <Input
+              label="Quốc gia"
               name="country"
               value={formData.country}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
             />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Mô tả *
-            </label>
-            <textarea
+            <Textarea
+              label="Mô tả *"
               name="description"
               value={formData.description}
               onChange={handleChange}
               required
-              rows={3}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
             />
-          </div>
+          </fieldset>
 
-          {/* Images */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Ảnh đại diện *
-              </label>
-              <input
-                type="url"
+          {/* Group 2: Ảnh */}
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-semibold text-gray-800">
+              🖼️ Hình ảnh
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Ảnh đại diện *"
                 name="image"
+                type="url"
                 value={formData.image}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Ảnh banner
-              </label>
-              <input
-                type="url"
+              <Input
+                label="Ảnh banner"
                 name="heroImage"
+                type="url"
                 value={formData.heroImage || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
             </div>
-          </div>
+          </fieldset>
 
-          {/* Rating + Review + Hotels */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Đánh giá
-              </label>
-              <input
-                type="number"
+          {/* Group 3: Đánh giá & Giá */}
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-semibold text-gray-800">
+              ⭐ Đánh giá & Giá cả
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="Đánh giá"
                 name="rating"
+                type="number"
                 value={formData.rating}
                 onChange={handleNumberChange}
-                min="0"
-                max="5"
-                step="0.1"
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Số đánh giá
-              </label>
-              <input
-                type="number"
+              <Input
+                label="Số đánh giá"
                 name="reviewCount"
+                type="number"
                 value={formData.reviewCount}
                 onChange={handleNumberChange}
-                min="0"
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Số khách sạn
-              </label>
-              <input
-                type="number"
+              <Input
+                label="Số khách sạn"
                 name="hotels"
+                type="number"
                 value={formData.hotels}
                 onChange={handleNumberChange}
-                min="0"
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
             </div>
-          </div>
-
-          {/* Prices */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Giá từ (VND)
-              </label>
-              <input
-                type="number"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Giá từ (VND)"
                 name="fromPrice"
+                type="number"
                 value={formData.fromPrice}
                 onChange={handleNumberChange}
-                min="0"
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Giá đến (VND)
-              </label>
-              <input
-                type="number"
+              <Input
+                label="Giá đến (VND)"
                 name="toPrice"
+                type="number"
                 value={formData.toPrice}
                 onChange={handleNumberChange}
-                min="0"
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
             </div>
-          </div>
+          </fieldset>
 
-          {/* Best time + Category */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Thời điểm tốt nhất
-              </label>
-              <input
-                type="text"
+          {/* Group 4: Thời gian, Danh mục */}
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-semibold text-gray-800">
+              📅 Thông tin thêm
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Thời điểm tốt nhất"
                 name="bestTime"
                 value={formData.bestTime}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Danh mục *
-              </label>
-              <select
+              <Select
+                label="Danh mục *"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                required
-                className="mt-1 block w-full border rounded-md px-3 py-2"
-              >
-                <option value="">Chọn danh mục</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                options={categories}
+              />
             </div>
-          </div>
-
-          {/* Popularity */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Độ phổ biến
-            </label>
-            <select
+            <Select
+              label="Độ phổ biến"
               name="popularity"
               value={formData.popularity}
               onChange={handleChange}
-              className="mt-1 block w-full border rounded-md px-3 py-2"
-            >
-              {popularityLevels.map((level) => (
-                <option key={level} value={level}>
-                  {level === "low"
-                    ? "Thấp"
-                    : level === "medium"
-                    ? "Trung bình"
-                    : "Cao"}
-                </option>
-              ))}
-            </select>
-          </div>
+              options={["Thấp", "Trung bình", "Cao"]}
+              values={popularityLevels}
+            />
+          </fieldset>
 
-          {/* Weather */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Nhiệt độ
-              </label>
-              <input
-                type="text"
+          {/* Group 5: Thời tiết */}
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-semibold text-gray-800">
+              🌦️ Thời tiết
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Nhiệt độ"
                 name="temperature"
                 value={formData.temperature || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Điều kiện thời tiết
-              </label>
-              <input
-                type="text"
+              <Input
+                label="Điều kiện thời tiết"
                 name="condition"
                 value={formData.condition || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Độ ẩm
-              </label>
-              <input
-                type="text"
+              <Input
+                label="Độ ẩm"
                 name="humidity"
                 value={formData.humidity || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Lượng mưa
-              </label>
-              <input
-                type="text"
+              <Input
+                label="Lượng mưa"
                 name="rainfall"
                 value={formData.rainfall || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
             </div>
-          </div>
+          </fieldset>
 
-          {/* Transport Times */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Thời gian bay
-              </label>
-              <input
-                type="text"
+          {/* Group 6: Di chuyển */}
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-semibold text-gray-800">
+              🚗 Thời gian di chuyển
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="Thời gian bay"
                 name="flightTime"
                 value={formData.flightTime || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Thời gian phà
-              </label>
-              <input
-                type="text"
+              <Input
+                label="Thời gian phà"
                 name="ferryTime"
                 value={formData.ferryTime || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Thời gian đi ô tô
-              </label>
-              <input
-                type="text"
+              <Input
+                label="Thời gian ô tô"
                 name="carTime"
                 value={formData.carTime || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border rounded-md px-3 py-2"
               />
             </div>
-          </div>
+          </fieldset>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300"
+              className="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              className="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium disabled:opacity-50"
             >
               {loading ? "Đang lưu..." : "Lưu"}
             </button>
@@ -499,3 +370,67 @@ export default function DestinationModal({
     </div>
   );
 }
+
+/* ------------------- COMPONENT INPUT TÁCH RIÊNG ------------------- */
+const Input = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+}: any) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-800">{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+    />
+  </div>
+);
+
+const Textarea = ({ label, name, value, onChange, required = false }: any) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-800">{label}</label>
+    <textarea
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      rows={3}
+      className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+    />
+  </div>
+);
+
+const Select = ({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  values,
+  required = false,
+}: any) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-800">{label}</label>
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+    >
+      <option value="">-- Chọn --</option>
+      {options.map((opt: string, idx: number) => (
+        <option key={opt} value={values ? values[idx] : opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </div>
+);

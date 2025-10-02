@@ -34,17 +34,17 @@ export default function DestinationSection() {
     const fetchDestinations = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/destinations');
+        const response = await fetch("/api/destinations");
         const result = await response.json();
-        
+
         if (result.success) {
           setData(result.data);
         } else {
-          setError(result.message || 'Failed to fetch destinations');
+          setError(result.message || "Failed to fetch destinations");
         }
       } catch (err) {
-        setError('Network error occurred');
-        console.error('Error fetching destinations:', err);
+        setError("Network error occurred");
+        console.error("Error fetching destinations:", err);
       } finally {
         setLoading(false);
       }
@@ -75,9 +75,9 @@ export default function DestinationSection() {
           <p className="text-gray-600 mb-4">
             {error || "Không thể tải dữ liệu điểm đến"}
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-gray-900 rounded hover:bg-blue-700 transition-colors"
           >
             Thử lại
           </button>
@@ -112,7 +112,7 @@ export default function DestinationSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {(data || []).slice(0, 8).map((destination: any, index: number) => (
-            <DestinationCard 
+            <DestinationCard
               key={destination.id}
               destination={destination}
               index={index}
@@ -122,7 +122,7 @@ export default function DestinationSection() {
 
         <div className="mt-12 text-center">
           <Link href="/destinations">
-            <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg">
+            <button className="px-8 py-3 bg-blue-600 text-gray-900 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg">
               Khám phá thêm
             </button>
           </Link>

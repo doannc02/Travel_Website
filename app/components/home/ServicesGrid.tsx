@@ -115,10 +115,30 @@ export default function ModernServicesSection() {
   ];
 
   const quickServices = [
-    { name: "Visa du lịch", icon: Shield, count: "150+ quốc gia", link: "/visa" },
-    { name: "Bảo hiểm du lịch", icon: Heart, count: "Bảo vệ toàn diện", link: "/insurance" },
-    { name: "Đổi tiền", icon: Globe, count: "Tỉ giá tốt nhất", link: "/currency" },
-    { name: "Wifi du lịch", icon: Zap, count: "Kết nối toàn cầu", link: "/wifi" },
+    {
+      name: "Visa du lịch",
+      icon: Shield,
+      count: "150+ quốc gia",
+      link: "/visa",
+    },
+    {
+      name: "Bảo hiểm du lịch",
+      icon: Heart,
+      count: "Bảo vệ toàn diện",
+      link: "/insurance",
+    },
+    {
+      name: "Đổi tiền",
+      icon: Globe,
+      count: "Tỉ giá tốt nhất",
+      link: "/currency",
+    },
+    {
+      name: "Wifi du lịch",
+      icon: Zap,
+      count: "Kết nối toàn cầu",
+      link: "/wifi",
+    },
   ];
 
   const handleServiceClick = (service: any) => {
@@ -130,7 +150,7 @@ export default function ModernServicesSection() {
   };
 
   const handlePlanTripClick = () => {
-    router.push('/packages');
+    router.push("/packages");
   };
 
   return (
@@ -211,14 +231,14 @@ export default function ModernServicesSection() {
                   {/* Icon overlay */}
                   <div className="absolute top-4 left-4">
                     <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-white" />
+                      <Icon className="w-6 h-6 text-gray-900" />
                     </div>
                   </div>
 
                   {/* Stats badge */}
                   <div className="absolute top-4 right-4">
                     <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                      <span className="text-white text-sm font-medium">
+                      <span className="text-gray-900 text-sm font-medium">
                         {service.stats}
                       </span>
                     </div>
@@ -239,13 +259,13 @@ export default function ModernServicesSection() {
                     {service.features.map((feature: any, index: number) => (
                       <div key={index} className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm text-gray-700">{feature}</span>
+                        <span className="text-sm text-gray-900">{feature}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Action button */}
-                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group">
+                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-gray-900 py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group">
                     <span>Khám phá ngay</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -261,7 +281,7 @@ export default function ModernServicesSection() {
         </div>
 
         {/* Stats Section */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-2xl p-8 text-white">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-2xl p-8 text-gray-900">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold mb-2">1M+</div>
@@ -284,8 +304,8 @@ export default function ModernServicesSection() {
 
         {/* Call to Action */}
         <div className="text-center mt-12">
-          <button 
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+          <button
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-gray-900 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             onClick={handlePlanTripClick}
           >
             <Calendar className="w-5 h-5" />

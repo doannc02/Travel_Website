@@ -1,7 +1,13 @@
 "use client";
-import { useState } from 'react';
-import { MotionDiv, MotionH2, MotionH3, MotionP, MotionButton } from '../../components/common/MotionWrapper';
-import Link from 'next/link';
+import { useState } from "react";
+import {
+  MotionDiv,
+  MotionH2,
+  MotionH3,
+  MotionP,
+  MotionButton,
+} from "../../components/common/MotionWrapper";
+import Link from "next/link";
 // app/auth/register/page.tsx
 interface FormData {
   firstName: string;
@@ -31,32 +37,32 @@ interface Errors {
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    dateOfBirth: '',
-    gender: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    dateOfBirth: "",
+    gender: "",
     agreeToTerms: false,
-    receiveNewsletter: true
+    receiveNewsletter: true,
   });
 
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Errors>({});
 
   const steps = [
-    { id: 1, title: 'Thông tin cá nhân', icon: '👤' },
-    { id: 2, title: 'Tài khoản & Bảo mật', icon: '🔐' },
-    { id: 3, title: 'Xác nhận', icon: '✅' }
+    { id: 1, title: "Thông tin cá nhân", icon: "👤" },
+    { id: 2, title: "Tài khoản & Bảo mật", icon: "🔐" },
+    { id: 3, title: "Xác nhận", icon: "✅" },
   ];
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -64,28 +70,36 @@ export default function RegisterPage() {
     const newErrors: Errors = {};
 
     if (step === 1) {
-      if (!formData.firstName.trim()) newErrors.firstName = 'Vui lòng nhập họ';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Vui lòng nhập tên';
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Vui lòng chọn ngày sinh';
-      if (!formData.gender) newErrors.gender = 'Vui lòng chọn giới tính';
+      if (!formData.firstName.trim()) newErrors.firstName = "Vui lòng nhập họ";
+      if (!formData.lastName.trim()) newErrors.lastName = "Vui lòng nhập tên";
+      if (!formData.dateOfBirth)
+        newErrors.dateOfBirth = "Vui lòng chọn ngày sinh";
+      if (!formData.gender) newErrors.gender = "Vui lòng chọn giới tính";
     }
 
     if (step === 2) {
-      if (!formData.email.trim()) newErrors.email = 'Vui lòng nhập email';
-      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email không hợp lệ';
-      
-      if (!formData.phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';
-      else if (!/^[0-9]{10,11}$/.test(formData.phone)) newErrors.phone = 'Số điện thoại không hợp lệ';
-      
-      if (!formData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
-      else if (formData.password.length < 8) newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
-      
-      if (!formData.confirmPassword) newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
-      else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Mật khẩu không khớp';
+      if (!formData.email.trim()) newErrors.email = "Vui lòng nhập email";
+      else if (!/\S+@\S+\.\S+/.test(formData.email))
+        newErrors.email = "Email không hợp lệ";
+
+      if (!formData.phone.trim())
+        newErrors.phone = "Vui lòng nhập số điện thoại";
+      else if (!/^[0-9]{10,11}$/.test(formData.phone))
+        newErrors.phone = "Số điện thoại không hợp lệ";
+
+      if (!formData.password) newErrors.password = "Vui lòng nhập mật khẩu";
+      else if (formData.password.length < 8)
+        newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự";
+
+      if (!formData.confirmPassword)
+        newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
+      else if (formData.password !== formData.confirmPassword)
+        newErrors.confirmPassword = "Mật khẩu không khớp";
     }
 
     if (step === 3) {
-      if (!formData.agreeToTerms) newErrors.agreeToTerms = 'Vui lòng đồng ý với điều khoản';
+      if (!formData.agreeToTerms)
+        newErrors.agreeToTerms = "Vui lòng đồng ý với điều khoản";
     }
 
     setErrors(newErrors);
@@ -94,17 +108,17 @@ export default function RegisterPage() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, steps.length));
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length));
     }
   };
 
   const handlePrev = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (validateStep(currentStep)) {
       try {
         const res = await fetch("/api/auth/register", {
@@ -117,14 +131,14 @@ export default function RegisterPage() {
             password: formData.password,
           }),
         });
-  
+
         const data = await res.json();
-  
+
         if (!res.ok) {
           alert(data.error || "Đăng ký thất bại");
           return;
         }
-  
+
         alert("Đăng ký thành công!");
         window.location.href = "/auth/login"; // chuyển sang trang đăng nhập
       } catch (err) {
@@ -133,7 +147,6 @@ export default function RegisterPage() {
       }
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12">
@@ -168,24 +181,32 @@ export default function RegisterPage() {
             <div className="flex items-center justify-between">
               {steps.map((step, index) => (
                 <div key={step.id} className="flex items-center">
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
-                    currentStep >= step.id 
-                      ? 'bg-red-600 border-red-600 text-white' 
-                      : 'bg-gray-100 border-gray-300 text-gray-500'
-                  }`}>
+                  <div
+                    className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+                      currentStep >= step.id
+                        ? "bg-red-600 border-red-600 text-gray-900"
+                        : "bg-gray-100 border-gray-300 text-gray-500"
+                    }`}
+                  >
                     <span className="text-lg">{step.icon}</span>
                   </div>
                   <div className="ml-3">
-                    <div className={`text-sm font-medium ${
-                      currentStep >= step.id ? 'text-red-600' : 'text-gray-500'
-                    }`}>
+                    <div
+                      className={`text-sm font-medium ${
+                        currentStep >= step.id
+                          ? "text-red-600"
+                          : "text-gray-500"
+                      }`}
+                    >
                       {step.title}
                     </div>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
-                      currentStep > step.id ? 'bg-red-600' : 'bg-gray-300'
-                    }`} />
+                    <div
+                      className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
+                        currentStep > step.id ? "bg-red-600" : "bg-gray-300"
+                      }`}
+                    />
                   )}
                 </div>
               ))}
@@ -211,70 +232,92 @@ export default function RegisterPage() {
                       <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
                         Thông tin cá nhân
                       </MotionH3>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
                             Họ <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={formData.firstName}
-                            onChange={(e) => handleInputChange('firstName', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("firstName", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.firstName ? 'border-red-500' : 'border-gray-300'
+                              errors.firstName
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             placeholder="Nhập họ của bạn"
                           />
                           {errors.firstName && (
-                            <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.firstName}
+                            </p>
                           )}
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
                             Tên <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={formData.lastName}
-                            onChange={(e) => handleInputChange('lastName', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("lastName", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.lastName ? 'border-red-500' : 'border-gray-300'
+                              errors.lastName
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             placeholder="Nhập tên của bạn"
                           />
                           {errors.lastName && (
-                            <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.lastName}
+                            </p>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
                             Ngày sinh <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="date" 
+                          <input
+                            type="date"
                             value={formData.dateOfBirth}
-                            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("dateOfBirth", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
+                              errors.dateOfBirth
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                           />
                           {errors.dateOfBirth && (
-                            <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.dateOfBirth}
+                            </p>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
                             Giới tính <span className="text-red-500">*</span>
                           </label>
-                          <select 
+                          <select
                             value={formData.gender}
-                            onChange={(e) => handleInputChange('gender', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("gender", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.gender ? 'border-red-500' : 'border-gray-300'
+                              errors.gender
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                           >
                             <option value="">Chọn giới tính</option>
@@ -283,7 +326,9 @@ export default function RegisterPage() {
                             <option value="other">Khác</option>
                           </select>
                           {errors.gender && (
-                            <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.gender}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -300,77 +345,106 @@ export default function RegisterPage() {
                       <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
                         Tài khoản & Bảo mật
                       </MotionH3>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
                             Email <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="email" 
+                          <input
+                            type="email"
                             value={formData.email}
-                            onChange={(e) => handleInputChange('email', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("email", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.email ? 'border-red-500' : 'border-gray-300'
+                              errors.email
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             placeholder="example@email.com"
                           />
                           {errors.email && (
-                            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.email}
+                            </p>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Số điện thoại <span className="text-red-500">*</span>
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
+                            Số điện thoại{" "}
+                            <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="tel" 
+                          <input
+                            type="tel"
                             value={formData.phone}
-                            onChange={(e) => handleInputChange('phone', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("phone", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.phone ? 'border-red-500' : 'border-gray-300'
+                              errors.phone
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             placeholder="0123456789"
                           />
                           {errors.phone && (
-                            <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.phone}
+                            </p>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
                             Mật khẩu <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="password" 
+                          <input
+                            type="password"
                             value={formData.password}
-                            onChange={(e) => handleInputChange('password', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("password", e.target.value)
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.password ? 'border-red-500' : 'border-gray-300'
+                              errors.password
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             placeholder="Tối thiểu 8 ký tự"
                           />
                           {errors.password && (
-                            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.password}
+                            </p>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Xác nhận mật khẩu <span className="text-red-500">*</span>
+                          <label className="block text-sm font-medium text-gray-900 mb-2">
+                            Xác nhận mật khẩu{" "}
+                            <span className="text-red-500">*</span>
                           </label>
-                          <input 
-                            type="password" 
+                          <input
+                            type="password"
                             value={formData.confirmPassword}
-                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "confirmPassword",
+                                e.target.value
+                              )
+                            }
                             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors ${
-                              errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                              errors.confirmPassword
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             placeholder="Nhập lại mật khẩu"
                           />
                           {errors.confirmPassword && (
-                            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                            <p className="text-red-500 text-sm mt-1">
+                              {errors.confirmPassword}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -387,61 +461,101 @@ export default function RegisterPage() {
                       <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
                         Xác nhận thông tin
                       </MotionH3>
-                      
+
                       <div className="bg-gray-50 p-6 rounded-lg">
-                        <h4 className="font-semibold text-gray-900 mb-4">Thông tin cá nhân</h4>
+                        <h4 className="font-semibold text-gray-900 mb-4">
+                          Thông tin cá nhân
+                        </h4>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-600">Họ tên:</span>
-                            <span className="ml-2 font-medium">{formData.firstName} {formData.lastName}</span>
+                            <span className="ml-2 font-medium">
+                              {formData.firstName} {formData.lastName}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-600">Ngày sinh:</span>
-                            <span className="ml-2 font-medium">{formData.dateOfBirth}</span>
+                            <span className="ml-2 font-medium">
+                              {formData.dateOfBirth}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-600">Giới tính:</span>
-                            <span className="ml-2 font-medium capitalize">{formData.gender}</span>
+                            <span className="ml-2 font-medium capitalize">
+                              {formData.gender}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-600">Email:</span>
-                            <span className="ml-2 font-medium">{formData.email}</span>
+                            <span className="ml-2 font-medium">
+                              {formData.email}
+                            </span>
                           </div>
                           <div>
-                            <span className="text-gray-600">Số điện thoại:</span>
-                            <span className="ml-2 font-medium">{formData.phone}</span>
+                            <span className="text-gray-600">
+                              Số điện thoại:
+                            </span>
+                            <span className="ml-2 font-medium">
+                              {formData.phone}
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-4">
                         <div className="flex items-start space-x-3">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             id="agreeToTerms"
                             checked={formData.agreeToTerms}
-                            onChange={(e) => handleInputChange('agreeToTerms', e.target.checked)}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "agreeToTerms",
+                                e.target.checked
+                              )
+                            }
                             className="mt-1"
                           />
-                          <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
-                            Tôi đồng ý với <span className="text-red-600 cursor-pointer">điều khoản sử dụng</span> và{' '}
-                            <span className="text-red-600 cursor-pointer">chính sách bảo mật</span> của Traveloka
+                          <label
+                            htmlFor="agreeToTerms"
+                            className="text-sm text-gray-600"
+                          >
+                            Tôi đồng ý với{" "}
+                            <span className="text-red-600 cursor-pointer">
+                              điều khoản sử dụng
+                            </span>{" "}
+                            và{" "}
+                            <span className="text-red-600 cursor-pointer">
+                              chính sách bảo mật
+                            </span>{" "}
+                            của Traveloka
                           </label>
                         </div>
                         {errors.agreeToTerms && (
-                          <p className="text-red-500 text-sm">{errors.agreeToTerms}</p>
+                          <p className="text-red-500 text-sm">
+                            {errors.agreeToTerms}
+                          </p>
                         )}
 
                         <div className="flex items-start space-x-3">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             id="receiveNewsletter"
                             checked={formData.receiveNewsletter}
-                            onChange={(e) => handleInputChange('receiveNewsletter', e.target.checked)}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "receiveNewsletter",
+                                e.target.checked
+                              )
+                            }
                             className="mt-1"
                           />
-                          <label htmlFor="receiveNewsletter" className="text-sm text-gray-600">
-                            Tôi muốn nhận thông tin về khuyến mãi và tin tức du lịch
+                          <label
+                            htmlFor="receiveNewsletter"
+                            className="text-sm text-gray-600"
+                          >
+                            Tôi muốn nhận thông tin về khuyến mãi và tin tức du
+                            lịch
                           </label>
                         </div>
                       </div>
@@ -456,8 +570,8 @@ export default function RegisterPage() {
                       disabled={currentStep === 1}
                       className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
                         currentStep === 1
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-gray-600 text-white hover:bg-gray-700'
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-gray-600 text-gray-900 hover:bg-gray-700"
                       }`}
                       whileHover={currentStep !== 1 ? { scale: 1.05 } : {}}
                       whileTap={currentStep !== 1 ? { scale: 0.95 } : {}}
@@ -469,7 +583,7 @@ export default function RegisterPage() {
                       <MotionButton
                         type="button"
                         onClick={handleNext}
-                        className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
+                        className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-gray-900 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -478,7 +592,7 @@ export default function RegisterPage() {
                     ) : (
                       <MotionButton
                         type="submit"
-                        className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                        className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-gray-900 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -501,48 +615,62 @@ export default function RegisterPage() {
                 <MotionH3 className="text-xl font-bold text-gray-900 mb-4">
                   Lợi ích khi đăng ký
                 </MotionH3>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
                     <span className="text-green-500 text-xl">✓</span>
                     <div>
-                      <div className="font-medium text-gray-900">Ưu đãi đặc biệt</div>
-                      <div className="text-sm text-gray-600">Nhận thông báo về khuyến mãi sớm nhất</div>
+                      <div className="font-medium text-gray-900">
+                        Ưu đãi đặc biệt
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Nhận thông báo về khuyến mãi sớm nhất
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <span className="text-green-500 text-xl">✓</span>
                     <div>
-                      <div className="font-medium text-gray-900">Đặt tour nhanh chóng</div>
-                      <div className="text-sm text-gray-600">Lưu thông tin để đặt tour dễ dàng hơn</div>
+                      <div className="font-medium text-gray-900">
+                        Đặt tour nhanh chóng
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Lưu thông tin để đặt tour dễ dàng hơn
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <span className="text-green-500 text-xl">✓</span>
                     <div>
-                      <div className="font-medium text-gray-900">Hỗ trợ 24/7</div>
-                      <div className="text-sm text-gray-600">Đội ngũ hỗ trợ chuyên nghiệp</div>
+                      <div className="font-medium text-gray-900">
+                        Hỗ trợ 24/7
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Đội ngũ hỗ trợ chuyên nghiệp
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-3">
                     <span className="text-green-500 text-xl">✓</span>
                     <div>
-                      <div className="font-medium text-gray-900">Tích điểm thưởng</div>
-                      <div className="text-sm text-gray-600">Tích lũy điểm cho mỗi chuyến đi</div>
+                      <div className="font-medium text-gray-900">
+                        Tích điểm thưởng
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Tích lũy điểm cho mỗi chuyến đi
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t pt-4 pb-2 mt-5">
-                  <p className="text-sm text-gray-600 mb-3">
-                    Đã có tài khoản?
-                  </p>
+                  <p className="text-sm text-gray-600 mb-3">Đã có tài khoản?</p>
                   <Link href="/auth/login">
                     <MotionButton
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-gray-900 py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >

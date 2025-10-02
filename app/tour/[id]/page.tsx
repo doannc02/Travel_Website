@@ -33,7 +33,7 @@ export default function TourDetailPage() {
   const params = useParams();
   const tourId = params.id as string;
   const [selectedImage, setSelectedImage] = useState(0);
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tourData, setTourData] = useState<any | null>(null);
@@ -99,7 +99,7 @@ export default function TourDetailPage() {
         <MotionButton
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="absolute top-6 left-6 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-colors"
+          className="absolute top-6 left-6 bg-white/20 backdrop-blur-sm text-gray-900 p-3 rounded-full hover:bg-white/30 transition-colors"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
@@ -130,15 +130,17 @@ export default function TourDetailPage() {
         </div>
 
         {/* Tour Info Overlay */}
-        <div className="absolute bottom-6 right-6 text-right text-white">
+        <div className="absolute bottom-6 right-6 text-right text-gray-900">
           <MotionH2 className="text-3xl lg:text-4xl font-bold mb-2">
             {tourData.title}
           </MotionH2>
           <MotionP className="text-base opacity-90 mb-2">
-            {tourData.tagline || `Khám phá ${tourData?.destination?.city} – kỳ quan thiên nhiên và văn hóa đặc sắc`}
+            {tourData.tagline ||
+              `Khám phá ${tourData?.destination?.city} – kỳ quan thiên nhiên và văn hóa đặc sắc`}
           </MotionP>
           <MotionP className="text-lg opacity-90 mb-2">
-            {tourData?.destination?.city}, {tourData?.destination?.country} • {tourData.duration}
+            {tourData?.destination?.city}, {tourData?.destination?.country} •{" "}
+            {tourData.duration}
           </MotionP>
           <div className="flex items-center justify-end space-x-2 mb-2">
             <span className="text-yellow-400">⭐</span>
@@ -166,12 +168,12 @@ export default function TourDetailPage() {
                   <div className="text-3xl font-bold text-red-600">
                     {formatVnd(tourData.price)}
                   </div>
-                  <div className="text-lg text-gray-400 line-through">
+                  <div className="text-lg text-gray-900 line-through">
                     {formatVnd(tourData.originalPrice)}
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  <span className="bg-red-600 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
                     {tourData.discount}
                   </span>
                   <div className="text-sm text-gray-600 mt-1">
@@ -182,7 +184,7 @@ export default function TourDetailPage() {
 
               <Link href={`/booking?packageId=${tourData.id}`}>
                 <MotionButton
-                  className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 text-gray-900 py-4 px-6 rounded-xl font-semibold text-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -217,22 +219,31 @@ export default function TourDetailPage() {
 
               {activeTab === "overview" && (
                 <div className="space-y-8">
-                  {Array.isArray(tourData.sections) && tourData.sections.length > 0 ? (
+                  {Array.isArray(tourData.sections) &&
+                  tourData.sections.length > 0 ? (
                     <>
                       {/* Intro */}
                       <div>
-                        <MotionH3 className="text-xl font-semibold mb-3">Giới thiệu</MotionH3>
-                        <MotionP className="text-gray-700 whitespace-pre-line">
-                          {tourData.description || 'Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực.'}
+                        <MotionH3 className="text-xl font-semibold mb-3">
+                          Giới thiệu
+                        </MotionH3>
+                        <MotionP className="text-gray-900 whitespace-pre-line">
+                          {tourData.description ||
+                            "Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực."}
                         </MotionP>
                       </div>
 
                       {/* Highlights */}
                       <div>
-                        <MotionH3 className="text-xl font-semibold mb-3">Điểm nổi bật</MotionH3>
+                        <MotionH3 className="text-xl font-semibold mb-3">
+                          Điểm nổi bật
+                        </MotionH3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {tourData.highlights.map((h: string, idx: number) => (
-                            <div key={idx} className="flex items-center space-x-2 text-gray-700">
+                            <div
+                              key={idx}
+                              className="flex items-center space-x-2 text-gray-900"
+                            >
                               <span className="text-green-600">✓</span>
                               <span>{h}</span>
                             </div>
@@ -243,12 +254,21 @@ export default function TourDetailPage() {
                       {/* Rich sections */}
                       {tourData.sections.map((s: any, idx: number) => (
                         <div key={idx}>
-                          <MotionH3 className="text-xl font-semibold mb-3">{s.title}</MotionH3>
-                          <MotionP className="text-gray-700 whitespace-pre-line">{s.content}</MotionP>
+                          <MotionH3 className="text-xl font-semibold mb-3">
+                            {s.title}
+                          </MotionH3>
+                          <MotionP className="text-gray-900 whitespace-pre-line">
+                            {s.content}
+                          </MotionP>
                           {s.photos?.length > 0 && (
                             <div className="mt-3 grid grid-cols-2 gap-3">
                               {s.photos.map((p: string, i: number) => (
-                                <img key={i} src={p} alt="section" className="rounded-xl object-cover w-full h-40" />
+                                <img
+                                  key={i}
+                                  src={p}
+                                  alt="section"
+                                  className="rounded-xl object-cover w-full h-40"
+                                />
                               ))}
                             </div>
                           )}
@@ -259,18 +279,26 @@ export default function TourDetailPage() {
                     <>
                       {/* Intro */}
                       <div>
-                        <MotionH3 className="text-xl font-semibold mb-3">Giới thiệu</MotionH3>
-                        <MotionP className="text-gray-700 whitespace-pre-line">
-                          {tourData.description || 'Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực.'}
+                        <MotionH3 className="text-xl font-semibold mb-3">
+                          Giới thiệu
+                        </MotionH3>
+                        <MotionP className="text-gray-900 whitespace-pre-line">
+                          {tourData.description ||
+                            "Hành trình đưa bạn đến những cảnh sắc tuyệt đẹp và trải nghiệm văn hóa bản địa chân thực."}
                         </MotionP>
                       </div>
 
                       {/* Highlights */}
                       <div>
-                        <MotionH3 className="text-xl font-semibold mb-3">Điểm nổi bật</MotionH3>
+                        <MotionH3 className="text-xl font-semibold mb-3">
+                          Điểm nổi bật
+                        </MotionH3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {tourData.highlights.map((h: string, idx: number) => (
-                            <div key={idx} className="flex items-center space-x-2 text-gray-700">
+                            <div
+                              key={idx}
+                              className="flex items-center space-x-2 text-gray-900"
+                            >
                               <span className="text-green-600">✓</span>
                               <span>{h}</span>
                             </div>
@@ -280,17 +308,23 @@ export default function TourDetailPage() {
 
                       {/* Culture & Food */}
                       <div>
-                        <MotionH3 className="text-xl font-semibold mb-3">Văn hóa & Ẩm thực</MotionH3>
-                        <MotionP className="text-gray-700 whitespace-pre-line">
-                          Khám phá văn hóa địa phương và thưởng thức ẩm thực đặc trưng vùng miền.
+                        <MotionH3 className="text-xl font-semibold mb-3">
+                          Văn hóa & Ẩm thực
+                        </MotionH3>
+                        <MotionP className="text-gray-900 whitespace-pre-line">
+                          Khám phá văn hóa địa phương và thưởng thức ẩm thực đặc
+                          trưng vùng miền.
                         </MotionP>
                       </div>
 
                       {/* Featured Experiences */}
                       <div>
-                        <MotionH3 className="text-xl font-semibold mb-3">Trải nghiệm nổi bật</MotionH3>
-                        <MotionP className="text-gray-700 whitespace-pre-line">
-                          Tắm biển, chèo kayak, ngắm hoàng hôn, khám phá chợ đêm và nhiều hơn nữa.
+                        <MotionH3 className="text-xl font-semibold mb-3">
+                          Trải nghiệm nổi bật
+                        </MotionH3>
+                        <MotionP className="text-gray-900 whitespace-pre-line">
+                          Tắm biển, chèo kayak, ngắm hoàng hôn, khám phá chợ đêm
+                          và nhiều hơn nữa.
                         </MotionP>
                       </div>
                     </>
@@ -300,19 +334,29 @@ export default function TourDetailPage() {
 
               {activeTab === "itinerary" && (
                 <div>
-                  <MotionH3 className="text-xl font-semibold mb-4">Lịch trình chi tiết</MotionH3>
+                  <MotionH3 className="text-xl font-semibold mb-4">
+                    Lịch trình chi tiết
+                  </MotionH3>
                   <div className="space-y-4">
                     {tourData.itinerary.map((item: any, idx: number) => (
                       <div key={idx} className="p-4 bg-gray-50 rounded-xl">
                         <div className="flex items-center justify-between">
-                          <div className="font-semibold text-gray-900">Ngày {item.day}</div>
-                         <div className="text-sm text-gray-600">
-                           {item.startTime && <span className="mr-3">🕒 {item.startTime}</span>}
-                           {item.transport && <span className="mr-3">🚗 {item.transport}</span>}
-                           {item.meals && <span>🍽 {item.meals}</span>}
-                         </div>
+                          <div className="font-semibold text-gray-900">
+                            Ngày {item.day}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {item.startTime && (
+                              <span className="mr-3">🕒 {item.startTime}</span>
+                            )}
+                            {item.transport && (
+                              <span className="mr-3">🚗 {item.transport}</span>
+                            )}
+                            {item.meals && <span>🍽 {item.meals}</span>}
+                          </div>
                         </div>
-                        <p className="text-gray-700 mt-2 whitespace-pre-line">{item.content}</p>
+                        <p className="text-gray-900 mt-2 whitespace-pre-line">
+                          {item.content}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -329,7 +373,7 @@ export default function TourDetailPage() {
                       {tourData.included.map((inc: string, idx: number) => (
                         <li
                           key={idx}
-                          className="flex items-center text-gray-700"
+                          className="flex items-center text-gray-900"
                         >
                           <span className="text-green-600 mr-2">✓</span>
                           {inc}
@@ -345,7 +389,7 @@ export default function TourDetailPage() {
                       {tourData.notIncluded.map((exc: string, idx: number) => (
                         <li
                           key={idx}
-                          className="flex items-center text-gray-700"
+                          className="flex items-center text-gray-900"
                         >
                           <span className="text-red-600 mr-2">✗</span>
                           {exc}
@@ -361,19 +405,33 @@ export default function TourDetailPage() {
                   {tourData.stops.map((stop: any, idx: number) => (
                     <div key={idx} className="p-4 bg-gray-50 rounded-xl">
                       <div className="flex items-center gap-3 mb-3">
-                       {stop.mapThumb && (
-                         <img src={stop.mapThumb} alt="map" className="w-24 h-24 rounded object-cover" />
-                       )}
+                        {stop.mapThumb && (
+                          <img
+                            src={stop.mapThumb}
+                            alt="map"
+                            className="w-24 h-24 rounded object-cover"
+                          />
+                        )}
                         <div>
-                          <MotionH3 className="text-lg font-semibold">{stop.title}</MotionH3>
-                          {stop.bestTime && <div className="text-xs text-gray-600">Thời gian lý tưởng: {stop.bestTime}</div>}
+                          <MotionH3 className="text-lg font-semibold">
+                            {stop.title}
+                          </MotionH3>
+                          {stop.bestTime && (
+                            <div className="text-xs text-gray-600">
+                              Thời gian lý tưởng: {stop.bestTime}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <p className="text-gray-700 mt-2 whitespace-pre-line">{stop.description}</p>
+                      <p className="text-gray-900 mt-2 whitespace-pre-line">
+                        {stop.description}
+                      </p>
                       {Array.isArray(stop.tips) && stop.tips.length > 0 && (
                         <div className="mt-3">
-                          <div className="font-semibold mb-1">Mẹo tham quan</div>
-                          <ul className="list-disc pl-5 text-gray-700 space-y-1">
+                          <div className="font-semibold mb-1">
+                            Mẹo tham quan
+                          </div>
+                          <ul className="list-disc pl-5 text-gray-900 space-y-1">
                             {stop.tips.map((t: string, i: number) => (
                               <li key={i}>{t}</li>
                             ))}
@@ -383,11 +441,18 @@ export default function TourDetailPage() {
                       {stop.photos?.length > 0 && (
                         <div className="mt-3 grid grid-cols-2 gap-3">
                           {stop.photos.map((p: string, i: number) => (
-                            <img key={i} src={p} alt="stop" className="rounded-xl object-cover w-full h-40" />
+                            <img
+                              key={i}
+                              src={p}
+                              alt="stop"
+                              className="rounded-xl object-cover w-full h-40"
+                            />
                           ))}
                         </div>
                       )}
-                      <div className="text-sm text-gray-600 mt-2">Hướng dẫn: {stop.guide}</div>
+                      <div className="text-sm text-gray-600 mt-2">
+                        Hướng dẫn: {stop.guide}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -398,33 +463,47 @@ export default function TourDetailPage() {
                   {/* Summary */}
                   <div className="p-4 bg-white rounded-xl border">
                     <div className="flex items-center gap-6">
-                      <div className="text-4xl font-bold text-yellow-500">{tourData.rating?.toFixed(1)}★</div>
+                      <div className="text-4xl font-bold text-yellow-500">
+                        {tourData.rating?.toFixed(1)}★
+                      </div>
                       <div className="flex-1 space-y-1">
-                        {[5,4,3,2,1].map((star) => {
+                        {[5, 4, 3, 2, 1].map((star) => {
                           const total = tourData.reviewCount || 0;
-                          const count = Math.round((Math.max(0, (6-star)) / 15) * total); // mock distribution
-                          const percent = total ? Math.round((count/total)*100) : 0;
+                          const count = Math.round(
+                            (Math.max(0, 6 - star) / 15) * total
+                          ); // mock distribution
+                          const percent = total
+                            ? Math.round((count / total) * 100)
+                            : 0;
                           return (
-                            <div key={star} className="flex items-center gap-2 text-sm">
+                            <div
+                              key={star}
+                              className="flex items-center gap-2 text-sm"
+                            >
                               <span className="w-8">{star}★</span>
                               <div className="flex-1 h-2 bg-gray-200 rounded">
-                                <div className="h-2 bg-yellow-400 rounded" style={{ width: `${percent}%` }} />
+                                <div
+                                  className="h-2 bg-yellow-400 rounded"
+                                  style={{ width: `${percent}%` }}
+                                />
                               </div>
                               <span className="w-10 text-right">{count}</span>
                             </div>
-                          )
+                          );
                         })}
                       </div>
                     </div>
                   </div>
-                  <MotionH3 className="text-lg font-semibold">Đánh giá ({reviews.length})</MotionH3>
+                  <MotionH3 className="text-lg font-semibold">
+                    Đánh giá ({reviews.length})
+                  </MotionH3>
                   {reviews.map((r) => (
                     <div key={r.id} className="p-4 bg-gray-50 rounded-xl">
                       <div className="flex items-center justify-between">
                         <div className="font-semibold">{r.name}</div>
                         <div>⭐ {r.rating}</div>
                       </div>
-                      <p className="text-gray-700 mt-2">{r.comment}</p>
+                      <p className="text-gray-900 mt-2">{r.comment}</p>
                       {r.photos?.length > 0 && (
                         <div className="flex gap-2 mt-3">
                           {r.photos.map((p, i) => (
@@ -457,7 +536,7 @@ export default function TourDetailPage() {
                       rows={4}
                       placeholder="Cảm nhận của bạn"
                     ></textarea>
-                    <MotionButton className="mt-3 bg-blue-600 text-white px-5 py-3 rounded">
+                    <MotionButton className="mt-3 bg-blue-600 text-gray-900 px-5 py-3 rounded">
                       Gửi đánh giá
                     </MotionButton>
                   </div>
@@ -472,19 +551,32 @@ export default function TourDetailPage() {
               <div className="text-xl font-semibold mb-4">Đặt tour nhanh</div>
               <div className="space-y-3">
                 <input type="date" className="w-full border p-3 rounded" />
-                <input type="number" min={1} defaultValue={2} className="w-full border p-3 rounded" placeholder="Số người" onChange={(e) => {
-                  const n = Math.max(1, Number(e.target.value || 1));
-                  const total = n * (tourData.price || 0);
-                  const el = document.getElementById('booking-total');
-                  if (el) el.textContent = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
-                }} />
+                <input
+                  type="number"
+                  min={1}
+                  defaultValue={2}
+                  className="w-full border p-3 rounded"
+                  placeholder="Số người"
+                  onChange={(e) => {
+                    const n = Math.max(1, Number(e.target.value || 1));
+                    const total = n * (tourData.price || 0);
+                    const el = document.getElementById("booking-total");
+                    if (el)
+                      el.textContent =
+                        new Intl.NumberFormat("vi-VN").format(total) + "đ";
+                  }}
+                />
                 <Link href={`/booking?packageId=${tourData.id}`}>
-                  <MotionButton className="w-full bg-green-600 text-white py-3 rounded-lg">Tiếp tục đặt chỗ</MotionButton>
+                  <MotionButton className="w-full bg-green-600 text-gray-900 py-3 rounded-lg">
+                    Tiếp tục đặt chỗ
+                  </MotionButton>
                 </Link>
               </div>
-              <div className="mt-4 text-sm text-gray-700 flex items-center justify-between">
+              <div className="mt-4 text-sm text-gray-900 flex items-center justify-between">
                 <span>Tổng dự kiến</span>
-                <span id="booking-total" className="font-semibold text-red-600">{new Intl.NumberFormat('vi-VN').format(tourData.price)}đ</span>
+                <span id="booking-total" className="font-semibold text-red-600">
+                  {new Intl.NumberFormat("vi-VN").format(tourData.price)}đ
+                </span>
               </div>
               <div className="mt-6 text-sm text-gray-600">
                 <div>Khởi hành: {tourData.departure}</div>
