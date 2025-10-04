@@ -77,7 +77,7 @@ export default function LoginPage() {
           localStorage.setItem("token", data.token);
         }
 
-        alert("Đăng nhập thành công!");
+        // alert("Đăng nhập thành công!");
         window.location.href = "/"; // chuyển về trang chủ
       } catch (err) {
         console.error("Login error:", err);

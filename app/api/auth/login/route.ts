@@ -40,17 +40,18 @@ export async function POST(req: NextRequest) {
 // Verify: check token
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("token")?.value ||
-                  req.headers.get("authorization")?.replace("Bearer ", "");
+    const token = req.cookies.get('token')?.value || req.cookies.get("admin_token")?.value;
 
     if (!token) {
-      return NextResponse.json({ error: "No token" }, { status: 401 });
+      return NextResponse.json({ isLoggedIn: false }, { status: 200 });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-
-    return NextResponse.json({ message: "Token OK", user: decoded });
-  } catch {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    return NextResponse.json({
+      isLoggedIn: true,
+      user: decoded, // gồm id, email, name, role
+    });
+  } catch (err) {
+    return NextResponse.json({ isLoggedIn: false }, { status: 200 });
   }
 }

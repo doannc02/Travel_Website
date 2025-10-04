@@ -459,6 +459,7 @@ model FlightBooking {
   @@map("flight_bookings")
 }
 
+
 model PackageBooking {
   id           String   @id @default(cuid())
   packageId    Int
@@ -469,7 +470,12 @@ model PackageBooking {
   bookingCode  String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
+  
+  // Thêm các trường mới
+  selectedDate    String?  // Ngày khởi hành
+  specialRequests String?  // Yêu cầu đặc biệt (lưu dạng JSON string)
+  contactInfo     String?  // Thông tin liên hệ (lưu dạng JSON string)
+  
   // Relations
   package TourPackage @relation(fields: [packageId], references: [id])
   user    User       @relation(fields: [userId], references: [id])

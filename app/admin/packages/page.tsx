@@ -38,9 +38,7 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [editingPackage, setEditingPackage] = useState<TourPackage | null>(
-    null
-  );
+  const [editingPackage, setEditingPackage] = useState<TourPackage | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -60,19 +58,23 @@ export default function PackagesPage() {
     fetchPackages();
   }, []);
 
+  // ✅ Lấy danh sách packages (tự gửi cookie)
   const fetchPackages = async () => {
     try {
-      const response = await fetch("/api/admin/packages");
+      const response = await fetch("/api/admin/packages", {
+        credentials: "include",
+      });
       if (response.ok) {
         const data = await response.json();
         setPackages(data.packages || []);
+      } else if (response.status === 401) {
+        alert("Bạn cần đăng nhập lại.");
+        window.location.href = "/admin/login";
       } else {
         console.error("Failed to fetch packages:", response.statusText);
-        setPackages([]);
       }
     } catch (error) {
       console.error("Failed to fetch packages:", error);
-      setPackages([]);
     } finally {
       setLoading(false);
     }
@@ -82,6 +84,7 @@ export default function PackagesPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // ✅ Tạo mới tour
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -97,10 +100,8 @@ export default function PackagesPage() {
 
       const response = await fetch("/api/admin/packages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(packageData),
       });
 
@@ -109,6 +110,9 @@ export default function PackagesPage() {
         setPackages((prev) => [newPackage, ...prev]);
         setShowModal(false);
         resetForm();
+      } else if (response.status === 401) {
+        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.");
+        window.location.href = "/admin/login";
       } else {
         const error = await response.json();
         alert(`Lỗi: ${error.error}`);
@@ -121,6 +125,7 @@ export default function PackagesPage() {
     }
   };
 
+  // ✅ Cập nhật tour
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPackage) return;
@@ -138,10 +143,8 @@ export default function PackagesPage() {
 
       const response = await fetch(`/api/admin/packages/${editingPackage.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(packageData),
       });
 
@@ -153,6 +156,9 @@ export default function PackagesPage() {
         setEditingPackage(null);
         setShowModal(false);
         resetForm();
+      } else if (response.status === 401) {
+        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.");
+        window.location.href = "/admin/login";
       } else {
         const error = await response.json();
         alert(`Lỗi: ${error.error}`);
@@ -165,17 +171,19 @@ export default function PackagesPage() {
     }
   };
 
+  // ✅ Xóa tour
   const handleDelete = async (id: number) => {
     if (confirm("Bạn có chắc chắn muốn xóa tour này?")) {
       try {
         const response = await fetch(`/api/admin/packages/${id}`, {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-          },
+          credentials: "include",
         });
         if (response.ok) {
-          setPackages(packages.filter((p) => p.id !== id));
+          setPackages((prev) => prev.filter((p) => p.id !== id));
+        } else if (response.status === 401) {
+          alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.");
+          window.location.href = "/admin/login";
         } else {
           const error = await response.json();
           alert(`Lỗi: ${error.error}`);
@@ -229,9 +237,9 @@ export default function PackagesPage() {
 
   const filteredPackages = packages.filter(
     (pkg) =>
-      pkg.name.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-      pkg.destination.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-      pkg.category.toLowerCase().includes(searchTerm?.toLowerCase())
+      pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pkg.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pkg.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {

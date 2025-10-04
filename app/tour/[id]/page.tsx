@@ -46,6 +46,11 @@ export default function TourDetailPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // Thêm check tourId tồn tại
+        if (!tourId) {
+          setError('Tour ID không hợp lệ');
+          return;
+        }
         const res = await fetch(`/api/packages/${tourId}?rich=1`);
         if (!res.ok) throw new Error("Failed to fetch");
         const json = await res.json();
@@ -59,6 +64,7 @@ export default function TourDetailPage() {
     };
     if (tourId) fetchData();
   }, [tourId]);
+
 
   const images: string[] = useMemo(() => {
     if (!tourData) return [];

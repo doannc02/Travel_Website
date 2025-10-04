@@ -37,12 +37,25 @@ export default function Header() {
   const [currentLanguage, setCurrentLanguage] = useState(
     headerData.languages[0]
   );
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [dataLogin, setLogined] = useState<{
+    email: string;
+    name: string;
+    role?: string;
+  } | null>();
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // hoặc "user"
-    setIsLoggedIn(!!token);
+    const checkLogin = async () => {
+      const res = await fetch("/api/auth/login", { credentials: "include" });
+      const data = await res.json();
+
+      if (!data.isLoggedIn) {
+        setLogined(null);
+      } else {
+        setLogined(data.user);
+      }
+    };
+
+    checkLogin();
   }, []);
 
   const pathname = usePathname();
@@ -164,16 +177,17 @@ export default function Header() {
 
             {/* User Menu */}
             <div className="relative">
-              <MotionButton
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-gray-900 rounded-lg hover:bg-red-700 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="text-lg">👤</span>
-                <span className="hidden sm:block font-medium">Đăng nhập</span>
-              </MotionButton>
-
+              {!dataLogin && (
+                <MotionButton
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-gray-900 rounded-lg hover:bg-red-700 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="text-lg">👤</span>
+                  <span className="hidden sm:block font-medium">Đăng nhập</span>
+                </MotionButton>
+              )}
               {/* User Dropdown */}
               {isUserMenuOpen && (
                 <MotionDiv

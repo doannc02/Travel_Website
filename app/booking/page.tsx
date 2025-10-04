@@ -1,778 +1,448 @@
 "use client";
-import { useState, useEffect } from "react";
-import {
-  MotionDiv,
-  MotionH2,
-  MotionH3,
-  MotionP,
-  MotionButton,
-} from "../components/common/MotionWrapper";
-import { useApi } from "../hooks/useApi";
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
-interface TourPackage {
-  id: number;
-  title: string;
-  subtitle: string;
-  image: string;
-  price: number;
-  discount: string;
-  duration: string;
-  destination: {
-    city: string;
-    country: string;
-  };
-}
-
-interface BookingData {
-  departureDate: string;
-  returnDate: string;
-  adults: number;
-  children: number;
-  infants: number;
-  roomType: string;
+interface BookingFormData {
+  packageId: string;
+  participants: number;
+  selectedDate: string;
   specialRequests: string;
   contactInfo: {
     fullName: string;
     email: string;
     phone: string;
-    address: string;
+    emergencyContact: string;
   };
 }
 
 export default function BookingPage() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedTour, setSelectedTour] = useState<TourPackage | null>(null);
-  const [bookingData, setBookingData] = useState<BookingData>({
-    departureDate: "",
-    returnDate: "",
-    adults: 2,
-    children: 0,
-    infants: 0,
-    roomType: "double",
-    specialRequests: "",
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const packageId = searchParams.get('packageId');
+  const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [tourPackage, setTourPackage] = useState<any>(null);
+  const [availableSpots, setAvailableSpots] = useState<number>(0);
+
+  const [formData, setFormData] = useState<BookingFormData>({
+    packageId: packageId || '',
+    participants: 2,
+    selectedDate: '',
+    specialRequests: '',
     contactInfo: {
-      fullName: "",
-      email: "",
-      phone: "",
-      address: "",
-    },
+      fullName: '',
+      email: '',
+      phone: '',
+      emergencyContact: ''
+    }
   });
 
-  // Fetch tour packages from API
-  const {
-    data: toursData,
-    loading: toursLoading,
-    error: toursError,
-  } = useApi<{
-    success: boolean;
-    data: TourPackage[];
-  }>("/api/tour-packages", { immediate: true });
-
-  const steps = [
-    { id: 1, title: "Chọn tour", icon: "🎯" },
-    { id: 2, title: "Thông tin đặt", icon: "📝" },
-    { id: 3, title: "Thanh toán", icon: "💳" },
-    { id: 4, title: "Xác nhận", icon: "✅" },
-  ];
-
-  // Set first tour as default when data loads
+  // Check authentication and fetch tour package
   useEffect(() => {
-    if (toursData?.success && toursData.data.length > 0 && !selectedTour) {
-      setSelectedTour(toursData.data[0]);
+    if (!packageId) {
+      setError('Không tìm thấy thông tin tour');
+      return;
     }
-  }, [toursData, selectedTour]);
+    checkAuth();
+    fetchTourPackage();
+  }, [packageId]);
 
-  const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth/login');
+      const data = await res.json();
+      setIsAuthenticated(data.isLoggedIn);
+      
+      if (!data.isLoggedIn) {
+        router.push(`/auth/signin?callbackUrl=/booking?packageId=${packageId}`);
+      } else if (data.user) {
+        // Pre-fill user info
+        setFormData(prev => ({
+          ...prev,
+          contactInfo: {
+            ...prev.contactInfo,
+            fullName: data.user.name || '',
+            email: data.user.email || '',
+            phone: data.user.phone || ''
+          }
+        }));
+      }
+    } catch (err) {
+      console.error('Auth check error:', err);
+      setIsAuthenticated(false);
     }
   };
 
-  const handlePrev = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+  const fetchTourPackage = async () => {
+    try {
+      const res = await fetch(`/api/packages/${packageId}?rich=1`);
+      if (!res.ok) throw new Error('Failed to fetch tour package');
+      const data = await res.json();
+      setTourPackage(data.data);
+      
+      // Set default date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      setFormData(prev => ({
+        ...prev,
+        selectedDate: tomorrowStr
+      }));
+
+      // Check availability
+      checkAvailability(tomorrowStr);
+    } catch (err) {
+      setError('Không thể tải thông tin tour');
     }
   };
 
-  const calculateTotal = () => {
-    if (!selectedTour) return 0;
-    const basePrice = selectedTour.price || 0;
-    const totalPeople = bookingData.adults + bookingData.children;
-    return basePrice * totalPeople;
+  const checkAvailability = async (date: string) => {
+    try {
+      const res = await fetch(`/api/packages/${packageId}/availability?date=${date}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableSpots(data.availableSpots);
+        
+        // Adjust participants if exceeds available spots
+        if (formData.participants > data.availableSpots) {
+          setFormData(prev => ({
+            ...prev,
+            participants: Math.max(1, data.availableSpots)
+          }));
+        }
+      }
+    } catch (err) {
+      console.error('Error checking availability:', err);
+    }
   };
 
-  const handleSubmitBooking = async () => {
-    if (!selectedTour) return;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    if (name.startsWith('contactInfo.')) {
+      const field = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        contactInfo: {
+          ...prev.contactInfo,
+          [field]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: name === 'participants' ? parseInt(value) : value
+      }));
+    }
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = e.target.value;
+    setFormData(prev => ({ ...prev, selectedDate: date }));
+    checkAvailability(date);
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.selectedDate) {
+      setError('Vui lòng chọn ngày khởi hành');
+      return false;
+    }
+
+    if (formData.participants < 1) {
+      setError('Số người tham gia phải lớn hơn 0');
+      return false;
+    }
+
+    if (formData.participants > availableSpots) {
+      setError(`Chỉ còn ${availableSpots} chỗ trống cho ngày này`);
+      return false;
+    }
+
+    if (!formData.contactInfo.fullName.trim()) {
+      setError('Vui lòng nhập họ tên');
+      return false;
+    }
+
+    if (!formData.contactInfo.email.trim()) {
+      setError('Vui lòng nhập email');
+      return false;
+    }
+
+    if (!formData.contactInfo.phone.trim()) {
+      setError('Vui lòng nhập số điện thoại');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await fetch("/api/bookings", {
-        method: "POST",
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          tourId: selectedTour.id,
-          ...bookingData,
-          totalPrice: calculateTotal(),
-          status: "pending",
-        }),
+        body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (result.success) {
-        handleNext(); // Move to confirmation step
-      } else {
-        console.error("Booking failed:", result.error);
+      if (!response.ok) {
+        throw new Error(data.error || 'Booking failed');
       }
-    } catch (error) {
-      console.error("Error submitting booking:", error);
+
+      // Redirect to confirmation page
+      router.push(`/booking/confirmation?bookingCode=${data.booking.bookingCode}`);
+      
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (toursLoading) {
+  if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <div className="text-lg">Đang kiểm tra đăng nhập...</div>
       </div>
     );
   }
 
-  if (toursError || !toursData?.success) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500">Đã xảy ra lỗi khi tải dữ liệu tour</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-gray-900 rounded"
-          >
-            Thử lại
-          </button>
-        </div>
+        <div className="text-lg">Đang chuyển hướng đến trang đăng nhập...</div>
       </div>
     );
   }
 
-  if (!selectedTour) {
+  if (!tourPackage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Không có tour nào khả dụng</p>
+        <div className="text-red-600">Không tìm thấy thông tin tour</div>
       </div>
     );
   }
+
+  const totalPrice = tourPackage.price * formData.participants;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <MotionH2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4"
-          >
-            Đặt lịch tour
-          </MotionH2>
-          <MotionP
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl text-gray-600 max-w-2xl mx-auto"
-          >
-            Hoàn tất thông tin để đặt tour du lịch mơ ước của bạn
-          </MotionP>
-        </div>
-
-        {/* Progress Steps */}
-        <MotionDiv
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+          className="bg-white rounded-2xl shadow-lg overflow-hidden"
         >
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
-                    currentStep >= step.id
-                      ? "bg-red-600 border-red-600 text-gray-900"
-                      : "bg-gray-100 border-gray-300 text-gray-500"
-                  }`}
-                >
-                  <span className="text-lg">{step.icon}</span>
-                </div>
-                <div className="ml-3">
-                  <div
-                    className={`text-sm font-medium ${
-                      currentStep >= step.id ? "text-red-600" : "text-gray-500"
-                    }`}
-                  >
-                    {step.title}
-                  </div>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
-                      currentStep > step.id ? "bg-red-600" : "bg-gray-300"
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+            <h1 className="text-2xl font-bold">Đặt Tour</h1>
+            <p className="opacity-90">{tourPackage.title}</p>
           </div>
-        </MotionDiv>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {/* Step 1: Tour Selection */}
-            {currentStep === 1 && (
-              <MotionDiv
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-2xl shadow-lg p-6"
-              >
-                <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Chọn tour du lịch
-                </MotionH3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {toursData.data.map((tour, index) => (
-                    <MotionDiv
-                      key={tour.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      onClick={() => setSelectedTour(tour)}
-                      className={`cursor-pointer rounded-xl border-2 transition-all duration-300 ${
-                        selectedTour.id === tour.id
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 hover:border-red-300"
-                      }`}
-                    >
-                      <div className="p-4">
-                        <img
-                          src={tour.image}
-                          alt={tour.title}
-                          className="w-full h-32 object-cover rounded-lg mb-3"
-                        />
-                        <MotionH3 className="font-bold text-gray-900 mb-2">
-                          {tour.title}
-                        </MotionH3>
-                        <MotionP className="text-gray-600 text-sm mb-3">
-                          {tour.subtitle}
-                        </MotionP>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-red-600">
-                            {new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            }).format(tour.price)}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {tour.duration}
-                          </span>
-                        </div>
-                      </div>
-                    </MotionDiv>
-                  ))}
-                </div>
-              </MotionDiv>
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
             )}
 
-            {/* Step 2: Booking Details */}
-            {currentStep === 2 && (
-              <MotionDiv
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-2xl shadow-lg p-6"
-              >
-                <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Thông tin đặt tour
-                </MotionH3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Travel Dates */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Ngày khởi hành
-                    </label>
-                    <input
-                      type="date"
-                      value={bookingData.departureDate}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          departureDate: e.target.value,
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Ngày về
-                    </label>
-                    <input
-                      type="date"
-                      value={bookingData.returnDate}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          returnDate: e.target.value,
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  {/* Number of People */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Người lớn
-                    </label>
-                    <select
-                      value={bookingData.adults}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          adults: parseInt(e.target.value),
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                        <option key={num} value={num}>
-                          {num} người
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Trẻ em
-                    </label>
-                    <select
-                      value={bookingData.children}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          children: parseInt(e.target.value),
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <option key={num} value={num}>
-                          {num} trẻ
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Room Type */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Loại phòng
-                    </label>
-                    <select
-                      value={bookingData.roomType}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          roomType: e.target.value,
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      <option value="single">Phòng đơn</option>
-                      <option value="double">Phòng đôi</option>
-                      <option value="triple">Phòng ba</option>
-                      <option value="family">Phòng gia đình</option>
-                    </select>
-                  </div>
-
-                  {/* Special Requests */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Yêu cầu đặc biệt
-                    </label>
-                    <textarea
-                      value={bookingData.specialRequests}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          specialRequests: e.target.value,
-                        })
-                      }
-                      rows={3}
-                      placeholder="Nhập yêu cầu đặc biệt của bạn..."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    />
-                  </div>
+            {/* Tour Summary */}
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="font-semibold text-lg mb-2">Thông tin Tour</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p><strong>Điểm đến:</strong> {tourPackage.destination?.city}</p>
+                  <p><strong>Thời lượng:</strong> {tourPackage.duration}</p>
+                  <p><strong>Khởi hành:</strong> {tourPackage.departure}</p>
                 </div>
-              </MotionDiv>
-            )}
-
-            {/* Step 3: Contact Information */}
-            {currentStep === 3 && (
-              <MotionDiv
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-2xl shadow-lg p-6"
-              >
-                <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Thông tin liên hệ
-                </MotionH3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Họ và tên
-                    </label>
-                    <input
-                      type="text"
-                      value={bookingData.contactInfo.fullName}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          contactInfo: {
-                            ...bookingData.contactInfo,
-                            fullName: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Nhập họ và tên"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={bookingData.contactInfo.email}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          contactInfo: {
-                            ...bookingData.contactInfo,
-                            email: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="example@email.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Số điện thoại
-                    </label>
-                    <input
-                      type="tel"
-                      value={bookingData.contactInfo.phone}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          contactInfo: {
-                            ...bookingData.contactInfo,
-                            phone: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="0123456789"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Địa chỉ
-                    </label>
-                    <input
-                      type="text"
-                      value={bookingData.contactInfo.address}
-                      onChange={(e) =>
-                        setBookingData({
-                          ...bookingData,
-                          contactInfo: {
-                            ...bookingData.contactInfo,
-                            address: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Nhập địa chỉ"
-                    />
-                  </div>
+                <div>
+                  <p><strong>Nhóm:</strong> {tourPackage.groupSize} người</p>
+                  <p><strong>Đánh giá:</strong> ⭐ {tourPackage.rating} ({tourPackage.reviewCount})</p>
+                  <p><strong>Giá/người:</strong> {new Intl.NumberFormat('vi-VN').format(tourPackage.price)}đ</p>
                 </div>
-              </MotionDiv>
-            )}
+              </div>
+            </div>
 
-            {/* Step 4: Confirmation */}
-            {currentStep === 4 && (
-              <MotionDiv
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-2xl shadow-lg p-6"
-              >
-                <MotionH3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Xác nhận đặt tour
-                </MotionH3>
+            {/* Booking Details */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Thông tin đặt tour</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Ngày khởi hành *
+                  </label>
+                  <input
+                    type="date"
+                    name="selectedDate"
+                    value={formData.selectedDate}
+                    onChange={handleDateChange}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
 
-                <div className="space-y-6">
-                  {/* Tour Summary */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">
-                      Thông tin tour
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Tour:</span>
-                        <span className="ml-2 font-medium">
-                          {selectedTour.title}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Ngày đi:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.departureDate}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Ngày về:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.returnDate}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Số người:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.adults + bookingData.children}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contact Summary */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-3">
-                      Thông tin liên hệ
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Họ tên:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.contactInfo.fullName}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Email:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.contactInfo.email}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Điện thoại:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.contactInfo.phone}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Địa chỉ:</span>
-                        <span className="ml-2 font-medium">
-                          {bookingData.contactInfo.address}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Terms */}
-                  <div className="flex items-start space-x-3">
-                    <input type="checkbox" className="mt-1" />
-                    <p className="text-sm text-gray-600">
-                      Tôi đồng ý với{" "}
-                      <span className="text-red-600 cursor-pointer">
-                        điều khoản sử dụng
-                      </span>{" "}
-                      và{" "}
-                      <span className="text-red-600 cursor-pointer">
-                        chính sách bảo mật
-                      </span>{" "}
-                      của Traveloka
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Số người tham gia *
+                  </label>
+                  <select
+                    name="participants"
+                    value={formData.participants}
+                    onChange={handleInputChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    {[...Array(Math.min(availableSpots, 20))].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1} người
+                      </option>
+                    ))}
+                  </select>
+                  {availableSpots > 0 ? (
+                    <p className="text-sm text-green-600 mt-1">
+                      Còn {availableSpots} chỗ trống
                     </p>
-                  </div>
+                  ) : (
+                    <p className="text-sm text-red-600 mt-1">
+                      Đã hết chỗ cho ngày này
+                    </p>
+                  )}
                 </div>
-              </MotionDiv>
-            )}
+              </div>
+            </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
-              <MotionButton
-                onClick={handlePrev}
-                disabled={currentStep === 1}
-                className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  currentStep === 1
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gray-600 text-gray-900 hover:bg-gray-700"
-                }`}
-                whileHover={currentStep !== 1 ? { scale: 1.05 } : {}}
-                whileTap={currentStep !== 1 ? { scale: 0.95 } : {}}
+            {/* Contact Information */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Thông tin liên hệ</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Họ tên *
+                  </label>
+                  <input
+                    type="text"
+                    name="contactInfo.fullName"
+                    value={formData.contactInfo.fullName}
+                    onChange={handleInputChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="contactInfo.email"
+                    value={formData.contactInfo.email}
+                    onChange={handleInputChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Số điện thoại *
+                  </label>
+                  <input
+                    type="tel"
+                    name="contactInfo.phone"
+                    value={formData.contactInfo.phone}
+                    onChange={handleInputChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Liên hệ khẩn cấp
+                  </label>
+                  <input
+                    type="text"
+                    name="contactInfo.emergencyContact"
+                    value={formData.contactInfo.emergencyContact}
+                    onChange={handleInputChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Số điện thoại người liên hệ khẩn cấp"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Special Requests */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Yêu cầu đặc biệt
+              </label>
+              <textarea
+                name="specialRequests"
+                value={formData.specialRequests}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Chế độ ăn uống, yêu cầu đặc biệt, dị ứng..."
+              />
+            </div>
+
+            {/* Price Summary */}
+            <div className="border-t pt-4">
+              <div className="flex justify-between items-center mb-2">
+                <span>Giá tour/người:</span>
+                <span>{new Intl.NumberFormat('vi-VN').format(tourPackage.price)}đ</span>
+              </div>
+              <div className="flex justify-between items-center mb-2">
+                <span>Số người:</span>
+                <span>{formData.participants}</span>
+              </div>
+              <div className="flex justify-between items-center text-lg font-bold border-t pt-2">
+                <span>Tổng cộng:</span>
+                <span className="text-red-600">
+                  {new Intl.NumberFormat('vi-VN').format(totalPrice)}đ
+                </span>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Quay lại
-              </MotionButton>
-
-              {currentStep < steps.length - 1 ? (
-                <MotionButton
-                  onClick={handleNext}
-                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-gray-900 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Tiếp tục
-                </MotionButton>
-              ) : currentStep === steps.length - 1 ? (
-                <MotionButton
-                  onClick={handleSubmitBooking}
-                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-gray-900 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Xác nhận đặt tour
-                </MotionButton>
-              ) : (
-                <MotionButton
-                  onClick={() => (window.location.href = "/my-bookings")}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-gray-900 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Xem đơn đặt tour
-                </MotionButton>
-              )}
+              </button>
+              <button
+                type="submit"
+                disabled={loading || availableSpots === 0}
+                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Đang xử lý...' : 'Xác nhận đặt tour'}
+              </button>
             </div>
-          </div>
-
-          {/* Right Sidebar - Summary */}
-          <div className="lg:col-span-1">
-            <MotionDiv
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-lg p-6 sticky top-6"
-            >
-              <MotionH3 className="text-xl font-bold text-gray-900 mb-4">
-                Tóm tắt đặt tour
-              </MotionH3>
-
-              {/* Selected Tour */}
-              <div className="mb-6">
-                <img
-                  src={selectedTour.image}
-                  alt={selectedTour.title}
-                  className="w-full h-32 object-cover rounded-lg mb-3"
-                />
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  {selectedTour.title}
-                </h4>
-                <p className="text-sm text-gray-600 mb-2">
-                  {selectedTour.subtitle}
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-red-600">
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(selectedTour.price)}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {selectedTour.duration}
-                  </span>
-                </div>
-              </div>
-
-              {/* Booking Summary */}
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-sm">
-                  <span>Ngày đi:</span>
-                  <span className="font-medium">
-                    {bookingData.departureDate || "Chưa chọn"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Ngày về:</span>
-                  <span className="font-medium">
-                    {bookingData.returnDate || "Chưa chọn"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Số người:</span>
-                  <span className="font-medium">
-                    {bookingData.adults + bookingData.children}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Loại phòng:</span>
-                  <span className="font-medium capitalize">
-                    {bookingData.roomType}
-                  </span>
-                </div>
-              </div>
-
-              {/* Price Breakdown */}
-              <div className="border-t pt-4 mb-6">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Giá tour:</span>
-                  <span>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(selectedTour.price)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Phí dịch vụ:</span>
-                  <span>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(150000)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-lg font-bold text-red-600">
-                  <span>Tổng cộng:</span>
-                  <span>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(calculateTotal())}
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Indicator */}
-              <div className="text-center">
-                <div className="text-sm text-gray-600 mb-2">
-                  Bước {currentStep} / {steps.length}
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-red-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(currentStep / steps.length) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </MotionDiv>
-          </div>
-        </div>
+          </form>
+        </motion.div>
       </div>
     </div>
   );
