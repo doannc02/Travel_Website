@@ -24,14 +24,34 @@ export const MotionA = dynamic(() => import('framer-motion').then(mod => ({ defa
   loading: ({ className, children, ...props }: any) => <a className={className} {...props}>{children}</a>
 });
 
-export const MotionButton = dynamic(() => import('framer-motion').then(mod => ({ default: mod.motion.button })), {
-  ssr: false,
-  loading: ({ className, children, ...props }: any) => (
-    <div className={className} {...filterDOMProps(props)}>
-      {children}
-    </div>
-  )
-});
+export const MotionButton = dynamic(
+  () => import('framer-motion').then(mod => ({ default: mod.motion.button })),
+  {
+    ssr: false,
+    loading: ({ className, children, onClick, ...props }: any) => {
+      const { 
+        isLoading, 
+        whileHover, 
+        whileTap, 
+        initial, 
+        animate,
+        transition,
+        variants,
+        ...domProps 
+      } = props;
+      
+      return (
+        <button 
+          className={className} 
+          onClick={onClick}
+          {...domProps}
+        >
+          {children}
+        </button>
+      );
+    }
+  }
+);
 
 export const MotionSpan = dynamic(() => import('framer-motion').then(mod => ({ default: mod.motion.span })), {
   ssr: false,
