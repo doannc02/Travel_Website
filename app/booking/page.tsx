@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
@@ -16,7 +16,8 @@ interface BookingFormData {
   };
 }
 
-export default function BookingPage() {
+// Component con sử dụng useSearchParams
+function BookingForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -226,6 +227,14 @@ export default function BookingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Đang chuyển hướng đến trang đăng nhập...</div>
+      </div>
+    );
+  }
+
+  if (!packageId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">Không tìm thấy thông tin tour</div>
       </div>
     );
   }
@@ -445,5 +454,23 @@ export default function BookingPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Loading component
+function BookingLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-lg">Đang tải trang đặt tour...</div>
+    </div>
+  );
+}
+
+// Component chính
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<BookingLoading />}>
+      <BookingForm />
+    </Suspense>
   );
 }
