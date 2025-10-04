@@ -42,13 +42,39 @@ export default function TourDetailPage() {
   const formatVnd = (n: number) =>
     new Intl.NumberFormat("vi-VN").format(n) + "đ";
 
+  const getHighlightContent = (highlight: any): string => {
+    if (typeof highlight === "string") return highlight;
+    if (highlight && typeof highlight === "object") {
+      return highlight.description || highlight.content || highlight.name || "";
+    }
+    return "";
+  };
+
+  // Hàm helper để lấy nội dung từ itinerary item
+  const getItineraryContent = (item: any): string => {
+    if (typeof item === "string") return item;
+    if (item && typeof item === "object") {
+      return item.content || item.description || "";
+    }
+    return "";
+  };
+
+  // Hàm helper để lấy day từ itinerary item
+  const getItineraryDay = (item: any, index: number): string => {
+    if (typeof item === "string") return String(index + 1);
+    if (item && typeof item === "object") {
+      return item.day || String(index + 1);
+    }
+    return String(index + 1);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         // Thêm check tourId tồn tại
         if (!tourId) {
-          setError('Tour ID không hợp lệ');
+          setError("Tour ID không hợp lệ");
           return;
         }
         const res = await fetch(`/api/packages/${tourId}?rich=1`);
@@ -64,7 +90,6 @@ export default function TourDetailPage() {
     };
     if (tourId) fetchData();
   }, [tourId]);
-
 
   const images: string[] = useMemo(() => {
     if (!tourData) return [];
@@ -200,6 +225,7 @@ export default function TourDetailPage() {
             </MotionDiv>
 
             {/* Tabs */}
+            {/* Tabs */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex space-x-4 border-b mb-6">
                 {[
@@ -239,21 +265,25 @@ export default function TourDetailPage() {
                         </MotionP>
                       </div>
 
-                      {/* Highlights */}
+                      {/* Highlights - SỬA LẠI PHẦN NÀY */}
                       <div>
                         <MotionH3 className="text-xl font-semibold mb-3">
                           Điểm nổi bật
                         </MotionH3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {tourData.highlights.map((h: string, idx: number) => (
-                            <div
-                              key={idx}
-                              className="flex items-center space-x-2 text-gray-900"
-                            >
-                              <span className="text-green-600">✓</span>
-                              <span>{h}</span>
-                            </div>
-                          ))}
+                          {Array.isArray(tourData.highlights) &&
+                            tourData.highlights.map((h: any, idx: number) => {
+                              const content = getHighlightContent(h);
+                              return content ? (
+                                <div
+                                  key={idx}
+                                  className="flex items-center space-x-2 text-gray-900"
+                                >
+                                  <span className="text-green-600">✓</span>
+                                  <span>{content}</span>
+                                </div>
+                              ) : null;
+                            })}
                         </div>
                       </div>
 
@@ -294,21 +324,25 @@ export default function TourDetailPage() {
                         </MotionP>
                       </div>
 
-                      {/* Highlights */}
+                      {/* Highlights - SỬA LẠI PHẦN NÀY */}
                       <div>
                         <MotionH3 className="text-xl font-semibold mb-3">
                           Điểm nổi bật
                         </MotionH3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {tourData.highlights.map((h: string, idx: number) => (
-                            <div
-                              key={idx}
-                              className="flex items-center space-x-2 text-gray-900"
-                            >
-                              <span className="text-green-600">✓</span>
-                              <span>{h}</span>
-                            </div>
-                          ))}
+                          {Array.isArray(tourData.highlights) &&
+                            tourData.highlights.map((h: any, idx: number) => {
+                              const content = getHighlightContent(h);
+                              return content ? (
+                                <div
+                                  key={idx}
+                                  className="flex items-center space-x-2 text-gray-900"
+                                >
+                                  <span className="text-green-600">✓</span>
+                                  <span>{content}</span>
+                                </div>
+                              ) : null;
+                            })}
                         </div>
                       </div>
 
@@ -344,27 +378,40 @@ export default function TourDetailPage() {
                     Lịch trình chi tiết
                   </MotionH3>
                   <div className="space-y-4">
-                    {tourData.itinerary.map((item: any, idx: number) => (
-                      <div key={idx} className="p-4 bg-gray-50 rounded-xl">
-                        <div className="flex items-center justify-between">
-                          <div className="font-semibold text-gray-900">
-                            Ngày {item.day}
+                    {Array.isArray(tourData.itinerary) &&
+                      tourData.itinerary.map((item: any, idx: number) => {
+                        const day = getItineraryDay(item, idx);
+                        const content = getItineraryContent(item);
+                        const startTime = item?.startTime
+                          ? String(item.startTime)
+                          : null;
+                        const transport = item?.transport
+                          ? String(item.transport)
+                          : null;
+                        const meals = item?.meals ? String(item.meals) : null;
+
+                        return (
+                          <div key={idx} className="p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between">
+                              <div className="font-semibold text-gray-900">
+                                Ngày {day}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {startTime && (
+                                  <span className="mr-3">🕒 {startTime}</span>
+                                )}
+                                {transport && (
+                                  <span className="mr-3">🚗 {transport}</span>
+                                )}
+                                {meals && <span>🍽 {meals}</span>}
+                              </div>
+                            </div>
+                            <p className="text-gray-900 mt-2 whitespace-pre-line">
+                              {content}
+                            </p>
                           </div>
-                          <div className="text-sm text-gray-600">
-                            {item.startTime && (
-                              <span className="mr-3">🕒 {item.startTime}</span>
-                            )}
-                            {item.transport && (
-                              <span className="mr-3">🚗 {item.transport}</span>
-                            )}
-                            {item.meals && <span>🍽 {item.meals}</span>}
-                          </div>
-                        </div>
-                        <p className="text-gray-900 mt-2 whitespace-pre-line">
-                          {item.content}
-                        </p>
-                      </div>
-                    ))}
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -376,15 +423,20 @@ export default function TourDetailPage() {
                       Bao gồm
                     </MotionH3>
                     <ul className="space-y-2">
-                      {tourData.included.map((inc: string, idx: number) => (
-                        <li
-                          key={idx}
-                          className="flex items-center text-gray-900"
-                        >
-                          <span className="text-green-600 mr-2">✓</span>
-                          {inc}
-                        </li>
-                      ))}
+                      {Array.isArray(tourData.included) &&
+                        tourData.included.map((inc: any, idx: number) => {
+                          const content =
+                            typeof inc === "string" ? inc : inc?.item || "";
+                          return content ? (
+                            <li
+                              key={idx}
+                              className="flex items-center text-gray-900"
+                            >
+                              <span className="text-green-600 mr-2">✓</span>
+                              {content}
+                            </li>
+                          ) : null;
+                        })}
                     </ul>
                   </div>
                   <div>
@@ -392,15 +444,20 @@ export default function TourDetailPage() {
                       Không bao gồm
                     </MotionH3>
                     <ul className="space-y-2">
-                      {tourData.notIncluded.map((exc: string, idx: number) => (
-                        <li
-                          key={idx}
-                          className="flex items-center text-gray-900"
-                        >
-                          <span className="text-red-600 mr-2">✗</span>
-                          {exc}
-                        </li>
-                      ))}
+                      {Array.isArray(tourData.notIncluded) &&
+                        tourData.notIncluded.map((exc: any, idx: number) => {
+                          const content =
+                            typeof exc === "string" ? exc : exc?.item || "";
+                          return content ? (
+                            <li
+                              key={idx}
+                              className="flex items-center text-gray-900"
+                            >
+                              <span className="text-red-600 mr-2">✗</span>
+                              {content}
+                            </li>
+                          ) : null;
+                        })}
                     </ul>
                   </div>
                 </div>
