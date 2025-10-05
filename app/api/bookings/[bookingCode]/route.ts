@@ -1,5 +1,6 @@
-import { prisma } from '@/app/lib/prisma';
-import { NextRequest, NextResponse } from 'next/server';
+// app/api/bookings/[bookingCode]/route.ts
+import { prisma } from "@/app/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
@@ -7,27 +8,27 @@ export async function GET(
 ) {
   try {
     const { bookingCode } = await params;
-    
+
     const booking = await prisma.packageBooking.findUnique({
       where: { bookingCode },
       include: {
         package: {
           include: {
-            destination: true
-          }
+            destination: true,
+          },
         },
         user: {
           select: {
             name: true,
             email: true,
-            phone: true
-          }
-        }
-      }
+            phone: true,
+          },
+        },
+      },
     });
 
     if (!booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
     // Tạo response object với kiểu an toàn
@@ -39,7 +40,7 @@ export async function GET(
       participants: booking.participants,
       totalPrice: booking.totalPrice,
       status: booking.status,
-      createdAt: booking.createdAt
+      createdAt: booking.createdAt,
     };
 
     // Chỉ thêm các trường optional nếu tồn tại
@@ -56,11 +57,13 @@ export async function GET(
     }
 
     return NextResponse.json({
-      booking: responseBooking
+      booking: responseBooking,
     });
-
   } catch (error) {
-    console.error('Get booking error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Get booking error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

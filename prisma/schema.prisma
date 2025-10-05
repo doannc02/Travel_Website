@@ -479,7 +479,7 @@ model PackageBooking {
   // Relations
   package TourPackage @relation(fields: [packageId], references: [id])
   user    User       @relation(fields: [userId], references: [id])
-
+  logs BookingLog[]
   @@map("package_bookings")
 }
 
@@ -498,9 +498,23 @@ model ActivityBooking {
   // Relations
   activity Activity @relation(fields: [activityId], references: [id])
   user     User    @relation(fields: [userId], references: [id])
-
   @@map("activity_bookings")
 }
+
+model BookingLog {
+  id          String   @id @default(cuid())
+  bookingId   String
+  bookingCode String
+  action      String
+  message     String?
+  userId      String?
+  meta        Json?
+  createdAt   DateTime @default(now())
+  booking PackageBooking @relation(fields: [bookingId], references: [id])
+
+  @@map("booking_logs")
+}
+
 
 model InsurancePolicy {
   id           String   @id @default(cuid())

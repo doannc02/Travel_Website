@@ -116,6 +116,7 @@ function BookingsTab() {
       return;
     setStatusUpdating(true);
     try {
+      console.log("Updating status...", booking, newStatus);
       const res = await fetch(`/api/admin/bookings/${booking.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -124,6 +125,7 @@ function BookingsTab() {
           adminUserId: "admin-system", // thay real admin id nếu có
           previousStatus: booking.status,
           note: `Changed by admin via web`,
+          bookingCode: booking.bookingCode,
         }),
       });
       const json = await res.json();
@@ -306,13 +308,22 @@ function BookingDetailsModal({
   const addLog = async () => {
     if (!logMessage.trim()) return;
     try {
+      const resUser = await fetch("/api/auth/me", { credentials: "include" });
+      if (!resUser.ok) {
+        // router.push("/auth/admin-login?redirect=/admin");
+        return;
+      }
+      const userData = await resUser.json();
       const res = await fetch(`/api/admin/bookings/${bookingId}/logs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          bookingId: bookingId,
           action: "admin_note",
           message: logMessage,
-          userId: "admin-system",
+          bookingCode: booking?.bookingCode || "",
+          note: logMessage,
+          userId: userData.user.id,
         }),
       });
       const j = await res.json();

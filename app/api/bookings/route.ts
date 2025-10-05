@@ -1,15 +1,18 @@
-import { prisma } from '@/app/lib/prisma';
-import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+// app/api/bookings/route.ts
+import { prisma } from "@/app/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export async function POST(request: NextRequest) {
   try {
     // Get token from cookies
-    const token = request.cookies.get('token')?.value || request.cookies.get('admin_token')?.value;
-    
+    const token =
+      request.cookies.get("token")?.value ||
+      request.cookies.get("admin_token")?.value;
+
     // Check authentication
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Verify token
@@ -17,23 +20,32 @@ export async function POST(request: NextRequest) {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET!);
     } catch (err) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { packageId, participants, selectedDate, specialRequests, contactInfo } = body;
+    const {
+      packageId,
+      participants,
+      selectedDate,
+      specialRequests,
+      contactInfo,
+    } = body;
 
     // Validation
     if (!packageId || !participants || !selectedDate) {
       return NextResponse.json(
-        { error: 'Missing required fields: packageId, participants, selectedDate' },
+        {
+          error:
+            "Missing required fields: packageId, participants, selectedDate",
+        },
         { status: 400 }
       );
     }
 
     if (participants < 1 || participants > 20) {
       return NextResponse.json(
-        { error: 'Number of participants must be between 1 and 20' },
+        { error: "Number of participants must be between 1 and 20" },
         { status: 400 }
       );
     }
@@ -42,10 +54,10 @@ export async function POST(request: NextRequest) {
     const tourDate = new Date(selectedDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (tourDate < today) {
       return NextResponse.json(
-        { error: 'Selected date cannot be in the past' },
+        { error: "Selected date cannot be in the past" },
         { status: 400 }
       );
     }
@@ -56,7 +68,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get tour package with availability check
@@ -66,14 +78,17 @@ export async function POST(request: NextRequest) {
         bookings: {
           where: {
             selectedDate: selectedDate,
-            status: { in: ['confirmed', 'pending'] }
-          }
-        }
-      }
+            status: { in: ["confirmed", "pending"] },
+          },
+        },
+      },
     });
 
     if (!tourPackage) {
-      return NextResponse.json({ error: 'Tour package not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Tour package not found" },
+        { status: 404 }
+      );
     }
 
     // Check if package is still valid
@@ -81,7 +96,7 @@ export async function POST(request: NextRequest) {
       const validUntil = new Date(tourPackage.validUntil);
       if (validUntil < today) {
         return NextResponse.json(
-          { error: 'This tour package has expired' },
+          { error: "This tour package has expired" },
           { status: 400 }
         );
       }
@@ -90,17 +105,17 @@ export async function POST(request: NextRequest) {
     // Check group size limits
     const groupSize = parseInt(tourPackage.groupSize) || 20;
     const currentBookingsCount = tourPackage.bookings.reduce(
-      (sum, booking) => sum + booking.participants, 
+      (sum, booking) => sum + booking.participants,
       0
     );
 
     if (currentBookingsCount + participants > groupSize) {
       const availableSpots = groupSize - currentBookingsCount;
       return NextResponse.json(
-        { 
-          error: 'Not enough available spots', 
+        {
+          error: "Not enough available spots",
           availableSpots,
-          message: `Only ${availableSpots} spots available` 
+          message: `Only ${availableSpots} spots available`,
         },
         { status: 400 }
       );
@@ -122,7 +137,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       participants: parseInt(participants),
       totalPrice,
-      status: 'confirmed',
+      status: "confirmed",
       bookingCode: generateBookingCode(),
       selectedDate: selectedDate,
     };
@@ -142,17 +157,17 @@ export async function POST(request: NextRequest) {
       include: {
         package: {
           include: {
-            destination: true
-          }
+            destination: true,
+          },
         },
         user: {
           select: {
             name: true,
             email: true,
-            phone: true
-          }
-        }
-      }
+            phone: true,
+          },
+        },
+      },
     });
 
     // Parse lại các trường JSON để response
@@ -165,20 +180,21 @@ export async function POST(request: NextRequest) {
       totalPrice: booking.totalPrice,
       status: booking.status,
       selectedDate: booking.selectedDate,
-      specialRequests: booking.specialRequests ? JSON.parse(booking.specialRequests) : null,
+      specialRequests: booking.specialRequests
+        ? JSON.parse(booking.specialRequests)
+        : null,
       contactInfo: booking.contactInfo ? JSON.parse(booking.contactInfo) : null,
-      createdAt: booking.createdAt
+      createdAt: booking.createdAt,
     };
 
     return NextResponse.json({
       success: true,
-      booking: responseBooking
+      booking: responseBooking,
     });
-
   } catch (error) {
-    console.error('Booking error:', error);
+    console.error("Booking error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
