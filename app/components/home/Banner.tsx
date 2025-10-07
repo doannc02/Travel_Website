@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   FiHome,
   FiAirplay,
@@ -7,6 +8,7 @@ import {
   FiUser,
   FiCalendar,
   FiSearch,
+  FiMapPin,
 } from "react-icons/fi";
 
 const TABS = [
@@ -16,6 +18,7 @@ const TABS = [
 ];
 
 export default function Banner() {
+  const router = useRouter();
   const [tab, setTab] = useState("hotel");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -23,42 +26,80 @@ export default function Banner() {
   const [guests, setGuests] = useState(1);
 
   const handleSearch = () => {
-    window.location.href = `/search?tab=${tab}&from=${encodeURIComponent(
-      from
-    )}&to=${encodeURIComponent(to)}&date=${date}&guests=${guests}`;
+    // Validate input
+    if (!from.trim()) {
+      alert("Vui lòng nhập điểm đến");
+      return;
+    }
+
+    // Tạo search params dựa trên tab
+    const searchParams = new URLSearchParams();
+
+    if (tab === "flight") {
+      searchParams.append("type", "flight");
+      searchParams.append("departure", from);
+      if (to) searchParams.append("arrival", to);
+    } else if (tab === "hotel") {
+      searchParams.append("type", "hotel");
+      searchParams.append("destination", from);
+    } else if (tab === "tour") {
+      searchParams.append("type", "tour");
+      searchParams.append("destination", from);
+    }
+
+    if (date) searchParams.append("date", date);
+    searchParams.append("guests", guests.toString());
+
+    // Redirect đến search page
+    router.push(`/search?${searchParams.toString()}`);
+  };
+
+  const getPlaceholder = () => {
+    switch (tab) {
+      case "flight":
+        return "Điểm khởi hành (VD: Hà Nội)";
+      case "hotel":
+        return "Thành phố, khách sạn hoặc điểm đến";
+      case "tour":
+        return "Điểm đến tour (VD: Đà Nẵng, Nha Trang)";
+      default:
+        return "Nhập điểm đến...";
+    }
+  };
+
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
   return (
     <section className="relative h-[420px] md:h-[520px] flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-400 overflow-hidden">
       {/* Background image */}
-      <img
-        src="/images/hero-bg1.jpg"
-        alt="banner"
-        className="absolute inset-0 w-full h-full object-cover object-center opacity-70"
-        loading="eager"
-      />
+      <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-800 to-blue-600">
+        <div className="absolute inset-0 bg-black/20"></div>
+      </div>
+      
       <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 to-blue-700/20"></div>
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 drop-shadow-lg text-center animate-fade-in">
+        <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg text-center animate-fade-in">
           Đặt phòng khách sạn, vé máy bay, tour du lịch giá tốt
         </h1>
-        <p className="text-lg md:text-xl text-gray-900 mb-8 drop-shadow text-center animate-fade-in">
-          Trải nghiệm du lịch dễ dàng, tiện lợi và an toàn cùng Traveloka Clone
+        <p className="text-lg md:text-xl text-white/90 mb-8 drop-shadow text-center animate-fade-in">
+          Trải nghiệm du lịch dễ dàng, tiện lợi và an toàn
         </p>
 
         {/* Tabs */}
-        <div className="flex justify-center mb-4">
-          <div className="flex bg-white/80 rounded-lg shadow-lg overflow-hidden backdrop-blur-md border border-blue-200">
+        <div className="flex justify-center mb-6">
+          <div className="flex bg-white/90 rounded-xl shadow-2xl overflow-hidden backdrop-blur-md border border-white/20">
             {TABS.map((t) => (
               <button
                 key={t.key}
-                className={`flex items-center gap-2 px-6 py-3 font-semibold text-base transition-all duration-200
+                className={`flex items-center gap-2 px-8 py-4 font-semibold text-base transition-all duration-300
                   ${
                     tab === t.key
-                      ? "bg-gradient-to-r from-blue-500 to-blue-400 text-gray-900 shadow-lg scale-105"
-                      : "text-blue-700 hover:bg-blue-100/60"
+                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-inner"
+                      : "text-blue-700 hover:bg-blue-50/80"
                   }`}
                 onClick={() => setTab(t.key)}
               >
@@ -70,78 +111,95 @@ export default function Banner() {
         </div>
 
         {/* Search form */}
-        <div
-          className="bg-white/60 backdrop-blur-xl border border-blue-200 rounded-2xl shadow-2xl p-6 flex flex-col md:flex-row gap-3 items-center max-w-3xl mx-auto
-          animate-fade-in"
-          style={{
-            boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.25)",
-            border: "1.5px solid rgba(30, 64, 175, 0.18)",
-          }}
-        >
-          {/* Điểm đi */}
-          <div className="flex items-center gap-2 flex-1 w-full">
-            <FiMap className="text-blue-500" />
-            <input
-              type="text"
-              className="w-full px-2 py-2 rounded-md outline-none text-gray-900 bg-transparent placeholder:text-blue-400"
-              placeholder={
-                tab === "flight"
-                  ? "Từ (VD: TP HCM)"
-                  : "Nhập điểm đến, khách sạn..."
-              }
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
-          </div>
-          {/* Điểm đến */}
-          {tab === "flight" && (
-            <div className="flex items-center gap-2 flex-1 w-full">
-              <FiMap className="text-blue-500" />
+        <div className="bg-white/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-6 flex flex-col md:flex-row gap-4 items-center max-w-4xl mx-auto animate-fade-in">
+          
+          {/* Điểm đi/Điểm đến */}
+          <div className="flex-1 w-full">
+            <div className="flex items-center gap-3">
+              <FiMapPin className="text-blue-500 text-lg flex-shrink-0" />
               <input
                 type="text"
-                className="w-full px-2 py-2 rounded-md outline-none text-gray-900 bg-transparent placeholder:text-blue-400"
-                placeholder="Đến (VD: Hà Nội)"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
+                className="w-full px-3 py-3 rounded-lg outline-none text-gray-900 bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder:text-gray-500"
+                placeholder={getPlaceholder()}
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Điểm đến (chỉ hiển thị với vé máy bay) */}
+          {tab === "flight" && (
+            <div className="flex-1 w-full">
+              <div className="flex items-center gap-3">
+                <FiMapPin className="text-blue-500 text-lg flex-shrink-0" />
+                <input
+                  type="text"
+                  className="w-full px-3 py-3 rounded-lg outline-none text-gray-900 bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder:text-gray-500"
+                  placeholder="Điểm đến (VD: TP HCM)"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                />
+              </div>
+            </div>
           )}
+
           {/* Ngày */}
-          <div className="flex items-center gap-2 flex-1 w-full">
-            <FiCalendar className="text-blue-500" />
-            <input
-              type="date"
-              className="w-full px-2 py-2 rounded-md outline-none text-gray-900 bg-transparent"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+          <div className="flex-1 w-full">
+            <div className="flex items-center gap-3">
+              <FiCalendar className="text-blue-500 text-lg flex-shrink-0" />
+              <input
+                type="date"
+                min={getTodayDate()}
+                className="w-full px-3 py-3 rounded-lg outline-none text-gray-900 bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
           </div>
+
           {/* Số khách */}
-          <div className="flex items-center gap-2 flex-1 w-full">
-            <FiUser className="text-blue-500" />
-            <input
-              type="number"
-              min={1}
-              className="w-full px-2 py-2 rounded-md outline-none text-gray-900 bg-transparent"
-              value={guests}
-              onChange={(e) => setGuests(Number(e.target.value))}
-            />
+          <div className="flex-1 w-full">
+            <div className="flex items-center gap-3">
+              <FiUser className="text-blue-500 text-lg flex-shrink-0" />
+              <select
+                className="w-full px-3 py-3 rounded-lg outline-none text-gray-900 bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                value={guests}
+                onChange={(e) => setGuests(Number(e.target.value))}
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+                  <option key={num} value={num}>
+                    {num} {num === 1 ? 'người' : 'người'}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
           {/* Nút tìm kiếm */}
           <button
-            className="bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-gray-900 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[140px] justify-center"
             onClick={handleSearch}
           >
-            <FiSearch />
+            <FiSearch className="text-lg" />
             Tìm kiếm
           </button>
         </div>
+
+        {/* Quick Suggestions */}
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {['Hà Nội', 'TP HCM', 'Đà Nẵng', 'Nha Trang', 'Phú Quốc', 'Hạ Long'].map((city) => (
+            <button
+              key={city}
+              onClick={() => setFrom(city)}
+              className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-white/30 transition-all border border-white/30"
+            >
+              {city}
+            </button>
+          ))}
+        </div>
       </div>
-      {/* Hiệu ứng fade-in (bạn thêm vào globals.css hoặc tailwind.config.js) */}
+
       <style jsx global>{`
-        .animate-fade-in {
-          animation: fadeIn 1s ease;
-        }
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -151,6 +209,9 @@ export default function Banner() {
             opacity: 1;
             transform: none;
           }
+        }
+        .animate-fade-in {
+          animation: fadeIn 1s ease;
         }
       `}</style>
     </section>
