@@ -22,6 +22,11 @@ const headerData = {
     { text: "Đăng ký", url: "/auth/register", icon: "📝" },
     { text: "Hỗ trợ", url: "/support", icon: "💬" },
   ],
+  useMenuLogin: [
+    { text: "Trang cá nhân", url: "/profile", icon: "👤" },
+    { text: "Hỗ trợ", url: "/support", icon: "💬" },
+    { text: "Đăng xuất", url: "/auth/logout", icon: "🚪" },
+  ],
   languages: [
     { code: "vi", name: "Tiếng Việt", flag: "🇻🇳" },
     { code: "en", name: "English", flag: "🇺🇸" },
@@ -41,21 +46,39 @@ export default function Header() {
     email: string;
     name: string;
     role?: string;
-  } | null>();
+  } | null>(null);
 
+  // Header component - phần useEffect
   useEffect(() => {
     const checkLogin = async () => {
-      const res = await fetch("/api/auth/login", { credentials: "include" });
-      const data = await res.json();
+      try {
+        const res = await fetch("/api/auth/login", { credentials: "include" });
+        const data = await res.json();
 
-      if (!data.isLoggedIn) {
+        if (!data.isLoggedIn) {
+          setLogined(null);
+        } else {
+          setLogined(data.user);
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
         setLogined(null);
-      } else {
-        setLogined(data.user);
       }
     };
 
     checkLogin();
+
+    // 🔄 Lắng nghe sự kiện cập nhật profile
+    const handleProfileUpdate = () => {
+      console.log("Profile updated, reloading user data...");
+      checkLogin();
+    };
+
+    window.addEventListener("userProfileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+    };
   }, []);
 
   const pathname = usePathname();
@@ -68,6 +91,21 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setLogined(null);
+      setIsUserMenuOpen(false);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <header
@@ -177,10 +215,39 @@ export default function Header() {
 
             {/* User Menu */}
             <div className="relative">
-              {!dataLogin && (
+              {dataLogin ? (
+                // Đã đăng nhập - Hiển thị tên và avatar
                 <MotionButton
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-gray-900 rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    {dataLogin.name?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <span className="hidden sm:block font-medium">
+                    {dataLogin.name ?? ""}
+                  </span>
+                  <svg
+                    className="w-4 h-4 transition-transform duration-200"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </MotionButton>
+              ) : (
+                // Chưa đăng nhập - Hiển thị nút đăng nhập
+                <MotionButton
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -188,6 +255,7 @@ export default function Header() {
                   <span className="hidden sm:block font-medium">Đăng nhập</span>
                 </MotionButton>
               )}
+
               {/* User Dropdown */}
               {isUserMenuOpen && (
                 <MotionDiv
@@ -196,17 +264,58 @@ export default function Header() {
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
                 >
-                  {headerData.userMenu.map((item) => (
-                    <Link
-                      key={item.text}
-                      href={item.url}
-                      className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <span className="text-lg">{item.icon}</span>
-                      <span className="text-sm font-medium">{item.text}</span>
-                    </Link>
-                  ))}
+                  {dataLogin ? (
+                    // Menu khi đã đăng nhập
+                    <>
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">
+                          {dataLogin.name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {dataLogin.email}
+                        </p>
+                      </div>
+                      {headerData.useMenuLogin.map((item) =>
+                        item.text === "Đăng xuất" ? (
+                          <button
+                            key={item.text}
+                            onClick={handleLogout}
+                            className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="text-sm font-medium">
+                              {item.text}
+                            </span>
+                          </button>
+                        ) : (
+                          <Link
+                            key={item.text}
+                            href={item.url}
+                            className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="text-sm font-medium">
+                              {item.text}
+                            </span>
+                          </Link>
+                        )
+                      )}
+                    </>
+                  ) : (
+                    // Menu khi chưa đăng nhập
+                    headerData.userMenu.map((item) => (
+                      <Link
+                        key={item.text}
+                        href={item.url}
+                        className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <span className="text-lg">{item.icon}</span>
+                        <span className="text-sm font-medium">{item.text}</span>
+                      </Link>
+                    ))
+                  )}
                 </MotionDiv>
               )}
             </div>
@@ -261,6 +370,54 @@ export default function Header() {
                   </Link>
                 </MotionDiv>
               ))}
+
+              {/* Mobile User Menu */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                {dataLogin ? (
+                  <>
+                    <div className="px-4 py-2">
+                      <p className="font-medium text-gray-900">
+                        {dataLogin.name}
+                      </p>
+                      <p className="text-sm text-gray-500">{dataLogin.email}</p>
+                    </div>
+                    {headerData.useMenuLogin.map((item) =>
+                      item.text === "Đăng xuất" ? (
+                        <button
+                          key={item.text}
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <span className="text-xl">{item.icon}</span>
+                          <span className="font-medium">{item.text}</span>
+                        </button>
+                      ) : (
+                        <Link
+                          key={item.text}
+                          href={item.url}
+                          className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <span className="text-xl">{item.icon}</span>
+                          <span className="font-medium">{item.text}</span>
+                        </Link>
+                      )
+                    )}
+                  </>
+                ) : (
+                  headerData.userMenu.map((item) => (
+                    <Link
+                      key={item.text}
+                      href={item.url}
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span className="text-xl">{item.icon}</span>
+                      <span className="font-medium">{item.text}</span>
+                    </Link>
+                  ))
+                )}
+              </div>
             </nav>
           </MotionDiv>
         )}

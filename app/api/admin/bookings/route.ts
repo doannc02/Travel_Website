@@ -13,14 +13,17 @@ export async function GET(request: Request) {
   );
 
   const where: any = {};
+
   if (q) {
     where.OR = [
       { bookingCode: { contains: q, mode: "insensitive" } },
-      // giả sử tour package title không trực tiếp trong bảng packagebooking:
-      // nếu cần join package table, dùng include conditionally below.
+      // Nếu cần tìm thêm theo tên package:
+      // { package: { title: { contains: q, mode: "insensitive" } } },
     ];
   }
-  if (status) {
+
+  // ✅ Chỉ lọc nếu status khác "all"
+  if (status && status !== "all") {
     where.status = status;
   }
 
@@ -36,5 +39,8 @@ export async function GET(request: Request) {
     },
   });
 
-  return NextResponse.json({ data: bookings, meta: { total, page, pageSize } });
+  return NextResponse.json({
+    data: bookings,
+    meta: { total, page, pageSize },
+  });
 }
