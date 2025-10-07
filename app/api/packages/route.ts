@@ -1,4 +1,4 @@
-// app/api/packages/route.ts
+// app/api/packages/route.ts (cập nhật)
 import { prisma } from '@/app/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
     const maxPrice = searchParams.get('maxPrice');
     const duration = searchParams.get('duration');
     const category = searchParams.get('category');
-    const limit = Math.max(Number(searchParams.get('limit')) || 10, 1);
+    const limit = Math.max(Number(searchParams.get('limit')) || 12, 1);
     const page = Math.max(Number(searchParams.get('page')) || 1, 1);
+    const sort = searchParams.get('sort') || 'popular';
 
     // Điều kiện where
     const where: any = {};
@@ -33,6 +34,27 @@ export async function GET(request: NextRequest) {
 
     if (category) {
       where.category = category;
+    }
+
+    // Sorting
+    let orderBy: any = {};
+    switch (sort) {
+      case 'price-low':
+        orderBy = { price: 'asc' };
+        break;
+      case 'price-high':
+        orderBy = { price: 'desc' };
+        break;
+      case 'rating':
+        orderBy = { rating: 'desc' };
+        break;
+      case 'newest':
+        orderBy = { createdAt: 'desc' };
+        break;
+      case 'popular':
+      default:
+        orderBy = { reviewCount: 'desc' };
+        break;
     }
 
     // Query + Count song song
@@ -62,8 +84,9 @@ export async function GET(request: NextRequest) {
           itinerary: { select: { day: true, content: true } },
           included: { select: { item: true } },
           notIncluded: { select: { item: true } },
+          createdAt: true,
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy
       }),
       prisma.tourPackage.count({ where })
     ]);
@@ -90,7 +113,7 @@ export async function GET(request: NextRequest) {
       itinerary: pkg.itinerary,
       included: pkg.included.map((i: any) => i.item),
       notIncluded: pkg.notIncluded.map((ni: any) => ni.item),
-      features: []
+      createdAt: pkg.createdAt
     }));
 
     return NextResponse.json({

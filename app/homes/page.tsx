@@ -19,9 +19,10 @@ export default function Home() {
       <main className="flex-grow">
         <HeroSection />
         <ServicesGrid />
-        <Promotions />
-        <Destinations />
         <FeaturedTours />
+        {/* <Promotions /> */}
+        <Destinations />
+       
       </main>
     </div>
   );
