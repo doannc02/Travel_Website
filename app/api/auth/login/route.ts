@@ -1,57 +1,95 @@
-// app/api/admin/auth/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { prisma } from "@/app/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
-// Đăng nhập: check email + password, trả JWT
-export async function POST(req: NextRequest) {
+const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET
+
+export async function POST(request: Request) {
   try {
-    const { email, password } = await req.json();
+    const { email, password } = await request.json();
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Tìm user
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (!user) {
-      return NextResponse.json({ error: "Sai email hoặc mật khẩu" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Email hoặc mật khẩu không đúng" },
+        { status: 400 }
+      );
     }
 
-    // Nếu DB lưu plain password thì đổi sang so sánh trực tiếp
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return NextResponse.json({ error: "Sai email hoặc mật khẩu" }, { status: 401 });
+    // Kiểm tra mật khẩu
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: "Email hoặc mật khẩu không đúng" },
+        { status: 400 }
+      );
     }
 
+    // 🚨 QUAN TRỌNG: KHÔNG cho phép admin login qua user route
+    if (user.role === "admin") {
+      return NextResponse.json(
+        { 
+          error: "Tài khoản admin chỉ có thể đăng nhập qua trang quản trị",
+          redirectTo: "/auth/admin-login"
+        },
+        { status: 403 }
+      );
+    }
+
+    // Tạo token user
     const token = jwt.sign(
-      { id: user.id, email: user.email , name: user.name , role: user.role},
-      process.env.JWT_SECRET!,
-      { expiresIn: "1h" }
+      {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
-    // Lưu cookie
-    const res = NextResponse.json({ message: "Login OK", token });
-    res.cookies.set("token", token, { httpOnly: true, path: "/" });
-    return res;
+    const response = NextResponse.json({
+      message: "Đăng nhập thành công",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      redirectTo: "/",
+    }, { status: 200 });
 
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
-
-// Verify: check token
-export async function GET(req: NextRequest) {
-  try {
-    const token = req.cookies.get('token')?.value || req.cookies.get("admin_token")?.value;
-
-    if (!token) {
-      return NextResponse.json({ isLoggedIn: false }, { status: 200 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    return NextResponse.json({
-      isLoggedIn: true,
-      user: decoded, // gồm id, email, name, role
+    // Set cookie user token
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60,
+      path: "/",
     });
-  } catch (err) {
-    return NextResponse.json({ isLoggedIn: false }, { status: 200 });
+
+    // 🚨 Xóa admin_token nếu có
+    response.cookies.set("admin_token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: "strict",
+      maxAge: 0,
+      path: "/",
+    });
+
+    return response;
+
+  } catch (error) {
+    console.error("Login error:", error);
+    return NextResponse.json(
+      { error: "Có lỗi xảy ra, vui lòng thử lại" },
+      { status: 500 }
+    );
   }
 }

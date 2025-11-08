@@ -1,3 +1,4 @@
+//---- app/api/auth/verify/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 

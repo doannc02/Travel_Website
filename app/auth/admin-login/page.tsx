@@ -149,15 +149,6 @@ function LoginFormContent() {
           >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </MotionButton>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">Demo Credentials:</p>
-            <p className="text-xs text-gray-500 mt-1">
-              Email: admin@travel.com
-              <br />
-              Password: admin123
-            </p>
-          </div>
         </form>
 
         {/* Security Notice */}

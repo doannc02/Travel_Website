@@ -55,12 +55,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_token");
-    // Clear cookie
-    document.cookie =
-      "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    router.push("/auth/admin-login");
+  const handleLogout = async () => {
+    try {
+      
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        // Clear all local storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("admin_token");
+        
+        
+        // Dispatch event để các component khác biết
+        window.dispatchEvent(new Event("userLoggedOut"));
+        
+        // Redirect to home page - sử dụng window.location để đảm bảo reload hoàn toàn
+        window.location.href = "/";
+      } else {
+        console.error("Logout failed");
+        // Fallback: vẫn clear local state
+        window.location.href = "/";
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback on error
+      localStorage.removeItem("token");
+      localStorage.removeItem("admin_token");
+      window.location.href = "/";
+    }
   };
 
   const navigation = [

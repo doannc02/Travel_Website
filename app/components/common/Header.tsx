@@ -25,7 +25,7 @@ const headerData = {
   useMenuLogin: [
     { text: "Trang cá nhân", url: "/profile", icon: "👤" },
     { text: "Hỗ trợ", url: "/support", icon: "💬" },
-    { text: "Đăng xuất", url: "/auth/logout", icon: "🚪" },
+    { text: "Đăng xuất", url: "#", icon: "🚪" }, // Đã sửa URL
   ],
   languages: [
     { code: "vi", name: "Tiếng Việt", flag: "🇻🇳" },
@@ -47,22 +47,32 @@ export default function Header() {
     name: string;
     role?: string;
   } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Header component - phần useEffect
+  const pathname = usePathname();
+
+  // 🔄 Check login status - ĐÃ SỬA
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await fetch("/api/auth/login", { credentials: "include" });
+        setLoading(true);
+        const res = await fetch("/api/auth/me", { 
+          credentials: "include" 
+        });
+        
         const data = await res.json();
+        console.log("Header auth check:", data);
 
-        if (!data.isLoggedIn) {
-          setLogined(null);
-        } else {
+        if (data.isLoggedIn && data.user) {
           setLogined(data.user);
+        } else {
+          setLogined(null);
         }
       } catch (error) {
         console.error("Error checking login status:", error);
         setLogined(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -74,14 +84,19 @@ export default function Header() {
       checkLogin();
     };
 
+    // 🔄 Lắng nghe sự kiện logout từ các component khác
+    const handleLogoutEvent = () => {
+      setLogined(null);
+    };
+
     window.addEventListener("userProfileUpdated", handleProfileUpdate);
+    window.addEventListener("userLoggedOut", handleLogoutEvent);
 
     return () => {
       window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+      window.removeEventListener("userLoggedOut", handleLogoutEvent);
     };
   }, []);
-
-  const pathname = usePathname();
 
   // Handle scroll effect
   useEffect(() => {
@@ -92,20 +107,83 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handle logout
+  // 🚪 Handle logout - ĐÃ SỬA
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
+      setIsUserMenuOpen(false);
+      setIsMobileMenuOpen(false);
+      
+      const res = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
-      setLogined(null);
-      setIsUserMenuOpen(false);
-      window.location.href = "/";
+
+      if (res.ok) {
+        // Clear all local storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("admin_token");
+        
+        // Reset state
+        setLogined(null);
+        
+        // Dispatch event để các component khác biết
+        window.dispatchEvent(new Event("userLoggedOut"));
+        
+        // Redirect to home page - sử dụng window.location để đảm bảo reload hoàn toàn
+        window.location.href = "/";
+      } else {
+        console.error("Logout failed");
+        // Fallback: vẫn clear local state
+        setLogined(null);
+        window.location.href = "/";
+      }
     } catch (error) {
       console.error("Logout error:", error);
+      // Fallback on error
+      localStorage.removeItem("token");
+      localStorage.removeItem("admin_token");
+      setLogined(null);
+      window.location.href = "/";
     }
   };
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      if (!target.closest('.user-menu-container') && isUserMenuOpen) {
+        setIsUserMenuOpen(false);
+      }
+      
+      if (!target.closest('.language-menu-container') && isLanguageMenuOpen) {
+        setIsLanguageMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isUserMenuOpen, isLanguageMenuOpen]);
+
+  // Hiển thị loading nếu đang check auth
+  if (loading) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            {/* Logo skeleton */}
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl lg:text-3xl">✈️</div>
+              <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            
+            {/* User menu skeleton */}
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header
@@ -148,8 +226,8 @@ export default function Header() {
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 group
                 ${
                   pathname === item.url
-                    ? "bg-red-600 text-gray-900 shadow-md"
-                    : "hover:bg-red-50 hover:text-red-600"
+                    ? "bg-red-600 text-white shadow-md"
+                    : "hover:bg-red-50 hover:text-red-600 text-gray-700"
                 }`}
                 >
                   <span className="text-lg">{item.icon}</span>
@@ -162,7 +240,7 @@ export default function Header() {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Language Selector */}
-            <div className="relative">
+            <div className="relative language-menu-container">
               <MotionButton
                 onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
                 className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -174,7 +252,9 @@ export default function Header() {
                   {currentLanguage.code.toUpperCase()}
                 </span>
                 <svg
-                  className="w-4 h-4 transition-transform duration-200"
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isLanguageMenuOpen ? "rotate-180" : ""
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -193,7 +273,6 @@ export default function Header() {
                 <MotionDiv
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
                 >
                   {headerData.languages.map((lang) => (
@@ -203,7 +282,7 @@ export default function Header() {
                         setCurrentLanguage(lang);
                         setIsLanguageMenuOpen(false);
                       }}
-                      className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left"
                     >
                       <span className="text-lg">{lang.flag}</span>
                       <span className="text-sm font-medium">{lang.name}</span>
@@ -214,7 +293,7 @@ export default function Header() {
             </div>
 
             {/* User Menu */}
-            <div className="relative">
+            <div className="relative user-menu-container">
               {dataLogin ? (
                 // Đã đăng nhập - Hiển thị tên và avatar
                 <MotionButton
@@ -226,11 +305,13 @@ export default function Header() {
                   <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
                     {dataLogin.name?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <span className="hidden sm:block font-medium">
-                    {dataLogin.name ?? ""}
+                  <span className="hidden sm:block font-medium text-gray-700">
+                    {dataLogin.name ?? "User"}
                   </span>
                   <svg
-                    className="w-4 h-4 transition-transform duration-200"
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isUserMenuOpen ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -261,7 +342,6 @@ export default function Header() {
                 <MotionDiv
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
                 >
                   {dataLogin ? (
@@ -349,7 +429,6 @@ export default function Header() {
           <MotionDiv
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
             className="lg:hidden border-t border-gray-200 py-4"
           >
             <nav className="space-y-2">
@@ -362,7 +441,7 @@ export default function Header() {
                 >
                   <Link
                     href={item.url}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span className="text-xl">{item.icon}</span>
@@ -386,7 +465,7 @@ export default function Header() {
                         <button
                           key={item.text}
                           onClick={handleLogout}
-                          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-left text-gray-700"
                         >
                           <span className="text-xl">{item.icon}</span>
                           <span className="font-medium">{item.text}</span>
@@ -395,7 +474,7 @@ export default function Header() {
                         <Link
                           key={item.text}
                           href={item.url}
-                          className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <span className="text-xl">{item.icon}</span>
@@ -409,7 +488,7 @@ export default function Header() {
                     <Link
                       key={item.text}
                       href={item.url}
-                      className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <span className="text-xl">{item.icon}</span>
