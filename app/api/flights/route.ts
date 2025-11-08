@@ -1,108 +1,6 @@
+// app/api/flights/route.tsx
 import { NextResponse } from 'next/server';
-
-// Mock flights data - in real app, this would come from a database
-const flightsData = [
-  {
-    id: 1,
-    airline: "Vietnam Airlines",
-    flightNumber: "VN123",
-    departure: "Hà Nội (HAN)",
-    arrival: "TP.HCM (SGN)",
-    departureTime: "08:00",
-    arrivalTime: "10:15",
-    duration: "2h 15m",
-    price: 1200000,
-    originalPrice: 1800000,
-    discount: "33%",
-    stops: "Bay thẳng",
-    aircraft: "Airbus A350",
-    class: "Economy",
-    availableSeats: 45,
-    features: ["Hành lý 7kg", "Đổi vé miễn phí", "Bữa ăn", "WiFi"],
-    departureDate: "2024-02-15",
-    returnDate: null
-  },
-  {
-    id: 2,
-    airline: "VietJet Air",
-    flightNumber: "VJ456",
-    departure: "Hà Nội (HAN)",
-    arrival: "Đà Nẵng (DAD)",
-    departureTime: "14:30",
-    arrivalTime: "15:45",
-    duration: "1h 15m",
-    price: 599000,
-    originalPrice: 1200000,
-    discount: "50%",
-    stops: "Bay thẳng",
-    aircraft: "Airbus A320",
-    class: "Economy",
-    availableSeats: 23,
-    features: ["Hành lý 7kg", "Đổi vé", "Bữa ăn"],
-    departureDate: "2024-02-15",
-    returnDate: null
-  },
-  {
-    id: 3,
-    airline: "Bamboo Airways",
-    flightNumber: "QH789",
-    departure: "TP.HCM (SGN)",
-    arrival: "Phú Quốc (PQC)",
-    departureTime: "16:00",
-    arrivalTime: "17:00",
-    duration: "1h 0m",
-    price: 450000,
-    originalPrice: 800000,
-    discount: "44%",
-    stops: "Bay thẳng",
-    aircraft: "Airbus A320",
-    class: "Economy",
-    availableSeats: 67,
-    features: ["Hành lý 7kg", "Đổi vé", "Bữa ăn"],
-    departureDate: "2024-02-15",
-    returnDate: null
-  },
-  {
-    id: 4,
-    airline: "Vietnam Airlines",
-    flightNumber: "VN456",
-    departure: "TP.HCM (SGN)",
-    arrival: "Hà Nội (HAN)",
-    departureTime: "20:00",
-    arrivalTime: "22:15",
-    duration: "2h 15m",
-    price: 1500000,
-    originalPrice: 2200000,
-    discount: "32%",
-    stops: "Bay thẳng",
-    aircraft: "Airbus A350",
-    class: "Economy",
-    availableSeats: 32,
-    features: ["Hành lý 7kg", "Đổi vé miễn phí", "Bữa ăn", "WiFi"],
-    departureDate: "2024-02-15",
-    returnDate: null
-  },
-  {
-    id: 5,
-    airline: "VietJet Air",
-    flightNumber: "VJ789",
-    departure: "Đà Nẵng (DAD)",
-    arrival: "Hà Nội (HAN)",
-    departureTime: "18:30",
-    arrivalTime: "19:45",
-    duration: "1h 15m",
-    price: 750000,
-    originalPrice: 1300000,
-    discount: "42%",
-    stops: "Bay thẳng",
-    aircraft: "Airbus A320",
-    class: "Economy",
-    availableSeats: 45,
-    features: ["Hành lý 7kg", "Đổi vé", "Bữa ăn"],
-    departureDate: "2024-02-15",
-    returnDate: null
-  }
-];
+import { prisma } from '../../lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -113,52 +11,108 @@ export async function GET(request: Request) {
     const returnDate = searchParams.get('returnDate');
     const passengers = searchParams.get('passengers');
     const classType = searchParams.get('class');
+    const airline = searchParams.get('airline');
+    const maxPrice = searchParams.get('maxPrice');
+    const stops = searchParams.get('stops');
 
-    let filteredFlights = [...flightsData];
-
-    // Apply filters
-    if (from && from !== '') {
-      filteredFlights = filteredFlights.filter(flight => 
-        flight.departure.includes(from)
-      );
+    // Build where clause for filtering
+    const where: any = {};
+    
+    if (from && from !== 'all') {
+      where.departure = {
+        contains: from,
+        mode: 'insensitive'
+      };
     }
 
-    if (to && to !== '') {
-      filteredFlights = filteredFlights.filter(flight => 
-        flight.arrival.includes(to)
-      );
+    if (to && to !== 'all') {
+      where.arrival = {
+        contains: to,
+        mode: 'insensitive'
+      };
     }
 
-    if (departureDate && departureDate !== '') {
-      filteredFlights = filteredFlights.filter(flight => 
-        flight.departureDate === departureDate
-      );
+    if (departureDate && departureDate !== 'all') {
+      where.departureDate = departureDate;
     }
 
-    if (classType && classType !== '') {
-      filteredFlights = filteredFlights.filter(flight => 
-        flight.class.toLowerCase() === classType.toLowerCase()
-      );
+    if (classType && classType !== 'all') {
+      where.class = {
+        contains: classType,
+        mode: 'insensitive'
+      };
     }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 150));
+    if (airline && airline !== 'all') {
+      where.airline = {
+        contains: airline,
+        mode: 'insensitive'
+      };
+    }
+
+    if (maxPrice && maxPrice !== 'all') {
+      where.price = {
+        lte: parseInt(maxPrice)
+      };
+    }
+
+    if (stops && stops !== 'all') {
+      where.stops = stops;
+    }
+
+    // Fetch flights with features
+    const flights = await prisma.flight.findMany({
+      where,
+      include: {
+        features: true
+      },
+      orderBy: {
+        price: 'asc'
+      }
+    });
+
+    // Transform data to match frontend expectations
+    const transformedFlights = flights.map((flight: any) => ({
+      id: flight.id,
+      airline: flight.airline,
+      flightNumber: flight.flightNumber,
+      departure: flight.departure,
+      arrival: flight.arrival,
+      departureTime: flight.departureTime,
+      arrivalTime: flight.arrivalTime,
+      duration: flight.duration,
+      price: flight.price,
+      originalPrice: flight.originalPrice,
+      discount: flight.discount,
+      stops: flight.stops,
+      aircraft: flight.aircraft,
+      class: flight.class,
+      availableSeats: flight.availableSeats,
+      departureDate: flight.departureDate,
+      returnDate: flight.returnDate,
+      features: flight.features.map((f: any) => f.name),
+      airlineLogo: `/airlines/${flight.airline.toLowerCase().replace(/\s+/g, '-')}.png`
+    }));
 
     return NextResponse.json({
       success: true,
-      data: filteredFlights,
-      total: filteredFlights.length,
-      searchParams: {
+      data: transformedFlights,
+      total: transformedFlights.length,
+      filters: {
         from,
         to,
         departureDate,
         returnDate,
         passengers,
-        class: classType
+        class: classType,
+        airline,
+        maxPrice,
+        stops
       }
     });
 
   } catch (error) {
+    console.error('Error fetching flights:', error);
     return NextResponse.json(
       { 
         success: false, 
@@ -173,36 +127,156 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log('Booking request body:', body); // Debug log
     
-    // Simulate creating a new flight booking
-    const newBooking = {
-      id: Date.now(),
-      flightId: body.flightId,
-      userId: body.userId,
-      passengers: body.passengers,
-      totalPrice: body.totalPrice,
-      status: 'confirmed',
-      bookingCode: `FL${Date.now().toString().slice(-6)}`,
-      createdAt: new Date().toISOString()
-    };
+    // Validate required fields với kiểm tra kỹ hơn
+    if (!body.flightId || !body.userId || !body.passengers || !body.totalPrice) {
+      console.log('Missing fields:', {
+        flightId: body.flightId,
+        userId: body.userId,
+        passengers: body.passengers,
+        totalPrice: body.totalPrice
+      });
+      
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Missing required fields',
+          message: 'Thiếu thông tin bắt buộc: flightId, userId, passengers, totalPrice'
+        },
+        { status: 400 }
+      );
+    }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Chuyển đổi kiểu dữ liệu
+    const flightId = parseInt(body.flightId);
+    const passengers = parseInt(body.passengers);
+    const totalPrice = parseInt(body.totalPrice);
+
+    // Kiểm tra kiểu dữ liệu
+    if (isNaN(flightId) || isNaN(passengers) || isNaN(totalPrice)) {
+      console.log('Invalid data types:', {
+        flightId: typeof body.flightId,
+        passengers: typeof body.passengers,
+        totalPrice: typeof body.totalPrice
+      });
+      
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Invalid data types',
+          message: 'Dữ liệu không hợp lệ: flightId, passengers, totalPrice phải là số'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if flight exists and has enough seats
+    const flight = await prisma.flight.findUnique({
+      where: { id: flightId }
+    });
+
+    if (!flight) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Flight not found',
+          message: 'Chuyến bay không tồn tại'
+        },
+        { status: 404 }
+      );
+    }
+
+    if (flight.availableSeats < passengers) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Not enough seats',
+          message: `Không đủ chỗ trống. Chỉ còn ${flight.availableSeats} chỗ`
+        },
+        { status: 400 }
+      );
+    }
+
+    // Generate booking code
+    const bookingCode = `FL${Date.now().toString().slice(-6)}`;
+
+    // Create new flight booking
+    const newBooking = await prisma.flightBooking.create({
+      data: {
+        flightId: flightId,
+        userId: body.userId,
+        passengers: passengers,
+        totalPrice: totalPrice,
+        status: 'confirmed',
+        bookingCode: bookingCode
+      },
+      include: {
+        flight: {
+          select: {
+            airline: true,
+            flightNumber: true,
+            departure: true,
+            arrival: true,
+            departureTime: true,
+            arrivalTime: true,
+            departureDate: true,
+            class: true
+          }
+        }
+      }
+    });
+
+    // Update available seats
+    await prisma.flight.update({
+      where: { id: flightId },
+      data: {
+        availableSeats: {
+          decrement: passengers
+        }
+      }
+    });
+
+    console.log('Booking created successfully:', newBooking.id);
 
     return NextResponse.json({
       success: true,
       message: 'Đặt vé thành công',
-      data: newBooking
+      data: {
+        id: newBooking.id,
+        bookingCode: newBooking.bookingCode,
+        flightId: newBooking.flightId,
+        airline: newBooking.flight.airline,
+        flightNumber: newBooking.flight.flightNumber,
+        departure: newBooking.flight.departure,
+        arrival: newBooking.flight.arrival,
+        departureTime: newBooking.flight.departureTime,
+        arrivalTime: newBooking.flight.arrivalTime,
+        departureDate: newBooking.flight.departureDate,
+        class: newBooking.flight.class,
+        passengers: newBooking.passengers,
+        totalPrice: newBooking.totalPrice,
+        status: newBooking.status,
+        createdAt: newBooking.createdAt
+      }
     }, { status: 201 });
 
   } catch (error) {
+    console.error('Error creating flight booking:', error);
+    
+    // Log chi tiết lỗi
+    if (error instanceof Error) {
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Bad request',
-        message: 'Dữ liệu đặt vé không hợp lệ'
+        error: 'Internal server error',
+        message: 'Lỗi hệ thống khi đặt vé: ' + (error instanceof Error ? error.message : 'Unknown error')
       },
-      { status: 400 }
+      { status: 500 }
     );
   }
-} 
+}

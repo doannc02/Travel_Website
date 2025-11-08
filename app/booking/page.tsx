@@ -17,7 +17,7 @@ interface BookingFormData {
 }
 
 // Component con sử dụng useSearchParams
-function BookingForm() {
+function BookingFormContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -27,6 +27,7 @@ function BookingForm() {
   const [error, setError] = useState<string | null>(null);
   const [tourPackage, setTourPackage] = useState<any>(null);
   const [availableSpots, setAvailableSpots] = useState<number>(0);
+  const [user, setUser] = useState<any>(null);
 
   const [formData, setFormData] = useState<BookingFormData>({
     packageId: packageId || '',
@@ -41,61 +42,118 @@ function BookingForm() {
     }
   });
 
-  // Check authentication and fetch tour package
+  // Check authentication và fetch data
   useEffect(() => {
     if (!packageId) {
       setError('Không tìm thấy thông tin tour');
       return;
     }
+    
     checkAuth();
-    fetchTourPackage();
   }, [packageId]);
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/auth/login');
-      const data = await res.json();
-      setIsAuthenticated(data.isLoggedIn);
+      console.log('Checking authentication...');
       
-      if (!data.isLoggedIn) {
-        router.push(`/auth/signin?callbackUrl=/booking?packageId=${packageId}`);
-      } else if (data.user) {
+      // Gọi API để check session/current user
+      const res = await fetch('/api/auth/me'); // Hoặc endpoint phù hợp
+      
+      if (!res.ok) {
+        throw new Error('Failed to check authentication');
+      }
+      
+      const data = await res.json();
+      console.log('Auth response:', data);
+      
+      // Kiểm tra theo structure từ API của bạn
+      if (data.user || (data.id && data.role !== 'admin')) {
+        // Có user data và không phải admin - đã đăng nhập
+        setIsAuthenticated(true);
+        const userData = data.user || data;
+        setUser(userData);
+        
         // Pre-fill user info
         setFormData(prev => ({
           ...prev,
           contactInfo: {
             ...prev.contactInfo,
-            fullName: data.user.name || '',
-            email: data.user.email || '',
-            phone: data.user.phone || ''
+            fullName: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || ''
           }
         }));
+        
+        // Fetch tour package sau khi xác thực thành công
+        fetchTourPackage();
+      } else {
+        // Không có user data hoặc là admin - chưa đăng nhập
+        setIsAuthenticated(false);
+        console.log('User not authenticated or is admin, redirecting to login...');
+        router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/booking?packageId=${packageId}`)}`);
       }
     } catch (err) {
       console.error('Auth check error:', err);
       setIsAuthenticated(false);
+      // Thử check bằng cách khác - kiểm tra cookie trực tiếp
+      checkAuthAlternative();
     }
+  };
+
+  // Phương thức dự phòng để check auth
+  const checkAuthAlternative = async () => {
+    try {
+      // Thử gọi một API đơn giản để kiểm tra
+      const res = await fetch('/api/auth/verify');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.user) {
+          setIsAuthenticated(true);
+          setUser(data.user);
+          fetchTourPackage();
+          return;
+        }
+      }
+    } catch (err) {
+      console.log('Alternative auth check failed');
+    }
+    
+    // Nếu cả hai cách đều thất bại, chuyển hướng đến login
+    router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/booking?packageId=${packageId}`)}`);
   };
 
   const fetchTourPackage = async () => {
     try {
+      console.log('Fetching tour package:', packageId);
       const res = await fetch(`/api/packages/${packageId}?rich=1`);
-      if (!res.ok) throw new Error('Failed to fetch tour package');
-      const data = await res.json();
-      setTourPackage(data.data);
       
-      // Set default date to tomorrow
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
-      setFormData(prev => ({
-        ...prev,
-        selectedDate: tomorrowStr
-      }));
+      if (!res.ok) {
+        throw new Error('Failed to fetch tour package');
+      }
+      
+      const data = await res.json();
+      console.log('Tour package data:', data);
+      
+      if (data.success && data.data) {
+        setTourPackage(data.data);
+        
+        // Set default date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        
+        setFormData(prev => ({
+          ...prev,
+          selectedDate: tomorrowStr
+        }));
 
-      // Check availability
-      checkAvailability(tomorrowStr);
+        // Check availability for default date
+        checkAvailability(tomorrowStr);
+      } else {
+        setError('Không thể tải thông tin tour');
+      }
     } catch (err) {
+      console.error('Error fetching tour package:', err);
       setError('Không thể tải thông tin tour');
     }
   };
@@ -105,18 +163,21 @@ function BookingForm() {
       const res = await fetch(`/api/packages/${packageId}/availability?date=${date}`);
       if (res.ok) {
         const data = await res.json();
-        setAvailableSpots(data.availableSpots);
+        setAvailableSpots(data.availableSpots || 0);
         
-        // Adjust participants if exceeds available spots
-        if (formData.participants > data.availableSpots) {
-          setFormData(prev => ({
-            ...prev,
-            participants: Math.max(1, data.availableSpots)
-          }));
-        }
+        setFormData(prev => {
+          if (prev.participants > (data.availableSpots || 0)) {
+            return {
+              ...prev,
+              participants: Math.max(1, data.availableSpots || 0)
+            };
+          }
+          return prev;
+        });
       }
     } catch (err) {
       console.error('Error checking availability:', err);
+      setAvailableSpots(0);
     }
   };
 
@@ -177,13 +238,21 @@ function BookingForm() {
       return false;
     }
 
+    setError(null);
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+
+    // Kiểm tra authentication lại trước khi submit
+    if (!isAuthenticated || !user) {
+      setError('Vui lòng đăng nhập để đặt tour');
+      setLoading(false);
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/booking?packageId=${packageId}`)}`);
+      return;
+    }
 
     if (!validateForm()) {
       setLoading(false);
@@ -196,37 +265,55 @@ function BookingForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          userId: user.id // Thêm userId từ user data
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Booking failed');
+        throw new Error(data.error || data.message || 'Booking failed');
       }
 
       // Redirect to confirmation page
-      router.push(`/booking/confirmation?bookingCode=${data.booking.bookingCode}`);
+      if (data.booking?.bookingCode) {
+        router.push(`/booking/confirmation?bookingCode=${data.booking.bookingCode}`);
+      } else if (data.data?.bookingCode) {
+        router.push(`/booking/confirmation?bookingCode=${data.data.bookingCode}`);
+      } else {
+        throw new Error('Không nhận được mã đặt tour');
+      }
       
     } catch (err: any) {
-      setError(err.message);
+      console.error('Booking error:', err);
+      setError(err.message || 'Có lỗi xảy ra khi đặt tour');
     } finally {
       setLoading(false);
     }
   };
 
+  // Hiển thị loading khi đang check auth
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Đang kiểm tra đăng nhập...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg">Đang kiểm tra đăng nhập...</div>
+        </div>
       </div>
     );
   }
 
+  // Hiển thị thông báo chuyển hướng
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Đang chuyển hướng đến trang đăng nhập...</div>
+        <div className="text-center">
+          <div className="text-lg mb-4">Bạn cần đăng nhập để đặt tour</div>
+          <div className="text-gray-600">Đang chuyển hướng đến trang đăng nhập...</div>
+        </div>
       </div>
     );
   }
@@ -234,7 +321,15 @@ function BookingForm() {
   if (!packageId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600">Không tìm thấy thông tin tour</div>
+        <div className="text-red-600 text-center">
+          <div className="text-lg font-semibold mb-2">Không tìm thấy thông tin tour</div>
+          <button 
+            onClick={() => router.back()}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            Quay lại trang trước
+          </button>
+        </div>
       </div>
     );
   }
@@ -242,7 +337,10 @@ function BookingForm() {
   if (!tourPackage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600">Không tìm thấy thông tin tour</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg">Đang tải thông tin tour...</div>
+        </div>
       </div>
     );
   }
@@ -261,6 +359,9 @@ function BookingForm() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
             <h1 className="text-2xl font-bold">Đặt Tour</h1>
             <p className="opacity-90">{tourPackage.title}</p>
+            <div className="text-sm opacity-80 mt-2">
+              Xin chào, {user?.name || user?.email || 'Khách'}!
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -461,7 +562,10 @@ function BookingForm() {
 function BookingLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="text-lg">Đang tải trang đặt tour...</div>
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div className="text-lg">Đang tải trang đặt tour...</div>
+      </div>
     </div>
   );
 }
@@ -470,7 +574,7 @@ function BookingLoading() {
 export default function BookingPage() {
   return (
     <Suspense fallback={<BookingLoading />}>
-      <BookingForm />
+      <BookingFormContent />
     </Suspense>
   );
 }
