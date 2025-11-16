@@ -24,6 +24,7 @@ const headerData = {
   ],
   useMenuLogin: [
     { text: "Trang cá nhân", url: "/profile", icon: "👤" },
+    { text: "Đơn đặt chỗ", url: "/account/bookings", icon: "📋" },
     { text: "Hỗ trợ", url: "/support", icon: "💬" },
     { text: "Đăng xuất", url: "#", icon: "🚪" }, // Đã sửa URL
   ],
@@ -56,10 +57,10 @@ export default function Header() {
     const checkLogin = async () => {
       try {
         setLoading(true);
-        const res = await fetch("/api/auth/me", { 
-          credentials: "include" 
+        const res = await fetch("/api/auth/me", {
+          credentials: "include",
         });
-        
+
         const data = await res.json();
         console.log("Header auth check:", data);
 
@@ -112,7 +113,7 @@ export default function Header() {
     try {
       setIsUserMenuOpen(false);
       setIsMobileMenuOpen(false);
-      
+
       const res = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -122,13 +123,13 @@ export default function Header() {
         // Clear all local storage
         localStorage.removeItem("token");
         localStorage.removeItem("admin_token");
-        
+
         // Reset state
         setLogined(null);
-        
+
         // Dispatch event để các component khác biết
         window.dispatchEvent(new Event("userLoggedOut"));
-        
+
         // Redirect to home page - sử dụng window.location để đảm bảo reload hoàn toàn
         window.location.href = "/";
       } else {
@@ -151,18 +152,18 @@ export default function Header() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      
-      if (!target.closest('.user-menu-container') && isUserMenuOpen) {
+
+      if (!target.closest(".user-menu-container") && isUserMenuOpen) {
         setIsUserMenuOpen(false);
       }
-      
-      if (!target.closest('.language-menu-container') && isLanguageMenuOpen) {
+
+      if (!target.closest(".language-menu-container") && isLanguageMenuOpen) {
         setIsLanguageMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isUserMenuOpen, isLanguageMenuOpen]);
 
   // Hiển thị loading nếu đang check auth
@@ -176,7 +177,7 @@ export default function Header() {
               <div className="text-2xl lg:text-3xl">✈️</div>
               <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
             </div>
-            
+
             {/* User menu skeleton */}
             <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
           </div>

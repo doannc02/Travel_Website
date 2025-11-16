@@ -83,7 +83,12 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="p-10 text-center">Đang tải...</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+      </div>
+    );
 
   return (
     <div className="max-w-2xl mx-auto p-6 mt-24 bg-white shadow-lg rounded-lg">

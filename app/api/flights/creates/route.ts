@@ -1,68 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import { prisma } from "@/app/lib/prisma";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-// GET - Lấy danh sách flights
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const search = searchParams.get("search") || "";
-    const airline = searchParams.get("airline") || "";
-
-    const skip = (page - 1) * limit;
-
-    // Xây dựng where clause
-    const where: any = {};
-
-    if (search) {
-      where.OR = [
-        { airline: { contains: search, mode: "insensitive" } },
-        { flightNumber: { contains: search, mode: "insensitive" } },
-        { departure: { contains: search, mode: "insensitive" } },
-        { arrival: { contains: search, mode: "insensitive" } },
-      ];
-    }
-
-    if (airline) {
-      where.airline = airline;
-    }
-
-    // Lấy flights với pagination
-    const [flights, total] = await Promise.all([
-      prisma.flight.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-        include: {
-          features: true,
-        },
-      }),
-      prisma.flight.count({ where }),
-    ]);
-
-    return NextResponse.json({
-      flights,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    console.error("Get flights error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-// POST - Thêm chuyến bay mới
 export async function POST(request: any) {
   try {
     const token = request.cookies.get("admin_token")?.value;
@@ -130,7 +70,6 @@ export async function POST(request: any) {
           )
         : "0";
 
-    // Tạo chuyến bay với transaction
     const flight = await prisma.$transaction(async (tx) => {
       // Tạo flight
       const newFlight = await tx.flight.create({

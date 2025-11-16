@@ -733,14 +733,9 @@ export default function AdminBookingsPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {loading ? (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center">
-                          <div className="flex justify-center items-center space-x-2 text-gray-500">
-                            <RefreshCcw className="w-4 h-4 animate-spin" />
-                            <span>Đang tải dữ liệu...</span>
-                          </div>
-                        </td>
-                      </tr>
+                      <div className="flex items-center justify-center h-64">
+                        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+                      </div>
                     ) : bookings.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="p-8 text-center">
