@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 // ==========================
 // Helper verify admin
 // ==========================
-export async function verifyAdmin(request: any) {
+async function verifyAdmin(request: any) {
   const token = request.cookies.get("admin_token")?.value;
 
   if (!token) return null;
